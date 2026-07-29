@@ -1,7 +1,9 @@
+import "./Sidebar.css";
+
 function Sidebar() {
     return(
-        <aside>
-            <h3>Menu</h3>
+        <aside className="sidebar">
+            <h3>Mission Menu</h3>
 
             <ul>
                 <li>Dashbord</li>
@@ -11,6 +13,7 @@ function Sidebar() {
                 <li>Analytics</li>
                 <li>Settings</li>
             </ul>
+            
         </aside>
     );
 }
