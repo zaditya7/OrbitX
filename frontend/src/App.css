@@ -1,0 +1,23 @@
+body{
+  margin: 0;
+  background: #0B1220;
+  color: white;
+  font-family: Arial, sans-serif;
+}
+.app-layout {
+  display: flex;
+  min-height: calc(100vh - 80px);
+}
+nav{
+  background: #111027;
+  padding: 20px;
+}
+aside {
+  width:250px;
+  background: #1E293B;
+  padding:20px;
+}
+main {
+  flex:1;
+  padding:20px;
+}
