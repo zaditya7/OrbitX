@@ -19,3 +19,9 @@
 .stat-card h1{
     font-size: 42px;
 }
+.cards {
+    display:flex;
+    gap: 20px;
+    margin-top: 30px;
+    margin-bottom: 30px;
+}

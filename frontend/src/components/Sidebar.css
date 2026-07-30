@@ -1,0 +1,22 @@
+.sidebar{
+  background: #16263B;
+  width: 250px;
+  min-height: 100vh;
+  padding: 20px;
+}
+.sidebar h3{
+  margin-bottom:20px;
+}
+.sidebar ul{
+  list-style:none;
+  padding:0;
+}
+.sidebar li {
+  padding:12px;
+  margin-bottom:10px;
+  border-radius:8px;
+  cursor: pointer;
+}
+.sidebar li:hover{
+  background:#284766
+}
