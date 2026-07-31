@@ -1,0 +1,16 @@
+.satellite-card {
+    width: 300px;
+    background-color: #1f2937;
+    color: white;
+    padding: 20px;
+    border-radius: 20px;
+    margin-bottom: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0 , 0, 0.3);
+}
+.satellite-card h3 {
+    margin: 0 0 10px;
+}
+
+.satellite-card p {
+    margin: 5px 0;
+}

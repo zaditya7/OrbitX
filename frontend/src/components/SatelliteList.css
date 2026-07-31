@@ -1,13 +1,8 @@
-.satellite-list ul {
-    list-style: none;
-    padding:0;
+.satellite-list{
+    display: flex;
+    flex-wrap: wrap;
+    gap:20px;
 }
-
-.satellite-list li{
-    margin: 10px 0;
-    font-size: 18px;
-}
-
-.satellite-list h2 {
-    margin-top: 15px;
+h2 {
+    margin: 8px;
 }

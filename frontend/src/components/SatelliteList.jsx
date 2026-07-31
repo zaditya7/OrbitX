@@ -4,22 +4,20 @@ import SatelliteCard from "./SalelliteCard";
 function SatelliteList () {
     
     const satellites = [
-            { name: "🛰 Hubble", status: "🟢 Active", country: "USA" },
-            { name: "🛰 ISS", status: "🟢 Active", country: "USA" },
-            { name: "🛰 Starlink", status: "🔴 Offline", country: "USA" },
-            { name: "🛰 Chandrayaan-3", status: "🟡 Maintanence", country: "India" }
+            { name: "🛰 Hubble", status: "active", country: "USA" },
+            { name: "🛰 ISS", status: "active", country: "USA" },
+            { name: "🛰 Starlink", status: "offline", country: "USA" },
+            { name: "🛰 Chandrayaan-3", status: "maintanence", country: "India" }
     ];
 
     return(
-        <div className="satellite-list">
+        <div>
             <h2>🛰 Satellites</h2>
-            
-            <ul>
-
+            <div className="satellite-list">
                 {satellites.map((satellite) => (
                     <SatelliteCard key={satellite.name} satellite={satellite} />
                 ))}
-            </ul>
+            </div>
         </div>
     );
 }
