@@ -1,0 +1,13 @@
+.satellite-list ul {
+    list-style: none;
+    padding:0;
+}
+
+.satellite-list li{
+    margin: 10px 0;
+    font-size: 18px;
+}
+
+.satellite-list h2 {
+    margin-top: 15px;
+}

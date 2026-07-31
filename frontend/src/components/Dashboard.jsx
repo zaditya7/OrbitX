@@ -1,6 +1,7 @@
 import StatCard from "./StatCard";
 import "./Dashboard.css";
 import MissionStatus from "./MissionStatus";
+import SatelliteList from "./SatelliteList";
 
 function Dashboard() {
     return(
@@ -14,6 +15,7 @@ function Dashboard() {
                 <StatCard title = "Signal Strength" value="98%"/>
             </div>
             <MissionStatus />
+            <SatelliteList />
         </main>
     );
 }
