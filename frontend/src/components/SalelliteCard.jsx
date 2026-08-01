@@ -1,6 +1,6 @@
 import "./SatelliteCard.css" ;
 
-function SatelliteCard({satellite})
+function SatelliteCard({satellite, deleteSatellite, editSatellite })
 {
     let statusText = " ";
     let statusColour = " ";
@@ -22,6 +22,11 @@ function SatelliteCard({satellite})
             <p style ={{ color: statusColour}}>{statusText}</p>
 
             <p>🌍{satellite.country}</p>
+
+            <button onClick ={() => 
+                editSatellite(satellite)} > Edit</button>
+            <button onClick={() => 
+                deleteSatellite(satellite.name)} > Delete</button>
         </div>
     );
 }

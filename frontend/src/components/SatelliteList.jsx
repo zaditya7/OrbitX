@@ -15,11 +15,34 @@ function SatelliteList () {
 
     const [country , setCountry ] = useState ("");
 
+    const [editingSatellite, setEditingSatellite] = useState(null) ;
+
     const addSatellite = () => {
 
         if (name === "" || country === "") {
-            return; }
-        
+            return; 
+        }
+
+        if (editingSatellite === null ) {
+
+            const updatedSatellites = satellites.map((satellite) => {
+                
+                if (satellite.name === editingSatellite.name) {
+                    
+                    return {
+                        ...satellite,
+                        name: name,
+                        country: country
+                    };
+                }
+
+                return satellites;
+            }); 
+
+            setSatellites(updatedSatellites);
+            setEditingSatellite(null);
+            setName("");
+            setCountry("");
 
         const newSatellite = {
             name: name ,
@@ -29,8 +52,25 @@ function SatelliteList () {
 
         setSatellites([...satellites, newSatellite]);
 
+        else {
+
+        }
+
         setName("");
         setCountry("");
+    };
+
+    const deleteSatellite = (name) => {
+
+        const updateSatellites = satellites.filter((satellite) => satellite.name !== name );
+        setSatellites(updateSatellites);
+    };
+
+    const editSatellite = (satellite) => {
+        setEditingSatellite(satellite);
+
+        setName(satellite.name);
+        setCountry(satellite.country);
     };
 
     return(
@@ -51,7 +91,11 @@ function SatelliteList () {
             <div className="satellite-list">
 
                 {satellites.map((satellite) => (
-                    <SatelliteCard key={satellite.name} satellite={satellite} />
+                    <SatelliteCard 
+                    key={satellite.name} 
+                    satellite={satellite}
+                    deleteSatellite = {deleteSatellite}
+                    editSatellite={editSatellite} />
                 ))}
 
             </div>
