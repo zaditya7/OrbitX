@@ -20,15 +20,22 @@ function SatelliteList () {
     const addSatellite = () => {
 
         if (name === "" || country === "") {
-            return; 
-        }
+            return; }
 
         if (editingSatellite === null ) {
 
+            const newSatellite = {
+            name: name ,
+            status:"active" ,
+            country: country
+            };
+
+            setSatellites([...satellites, newSatellite]);
+            
+        } else {
+
             const updatedSatellites = satellites.map((satellite) => {
-                
                 if (satellite.name === editingSatellite.name) {
-                    
                     return {
                         ...satellite,
                         name: name,
@@ -36,25 +43,13 @@ function SatelliteList () {
                     };
                 }
 
-                return satellites;
-            }); 
-
+                return satellite;
+            });
             setSatellites(updatedSatellites);
             setEditingSatellite(null);
-            setName("");
-            setCountry("");
-
-        const newSatellite = {
-            name: name ,
-            status:"active" ,
-            country: country
-        };
-
-        setSatellites([...satellites, newSatellite]);
-
-        else {
 
         }
+
 
         setName("");
         setCountry("");
@@ -85,7 +80,7 @@ function SatelliteList () {
             onChange={(e) => setCountry (e.target.value)} />
 
 
-            <button onClick={addSatellite} > Add Satellite </button>
+            <button onClick={addSatellite} > {editingSatellite === null ? "Add Satellite" : "Save Changes"}</button>
 
 
             <div className="satellite-list">
