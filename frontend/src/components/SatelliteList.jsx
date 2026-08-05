@@ -17,6 +17,8 @@ function SatelliteList () {
 
     const [editingSatellite, setEditingSatellite] = useState(null) ;
 
+    const [search , setSearch ] = useState("");
+
     const addSatellite = () => {
 
         if (name === "" || country === "") {
@@ -72,6 +74,9 @@ function SatelliteList () {
         <div>
             <h2>🛰 Satellites</h2>
 
+            <input type="text" placeholder ="Search satellites..." value = {search} 
+            onChange={(e) => setSearch(e.target.value)} />
+
             <input type = "text" placeholder="Satellite Name" value = {name} 
             onChange = {(e) => setName (e.target.value)} />
 
@@ -85,7 +90,11 @@ function SatelliteList () {
 
             <div className="satellite-list">
 
-                {satellites.map((satellite) => (
+                {satellites
+                .filter((satellite) =>
+                satellite.name.toLowerCase().includes(search.toLowerCase()))
+
+                .map((satellite) => (
                     <SatelliteCard 
                     key={satellite.name} 
                     satellite={satellite}
