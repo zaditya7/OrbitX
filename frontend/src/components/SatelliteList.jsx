@@ -1,6 +1,6 @@
 import "./SatelliteList.css";
-import SatelliteCard from "./SalelliteCard";
-import {useState} from "react" ;
+import SatelliteCard from "./SatelliteCard";
+import {useState, useEffect, useRef} from "react" ;
 
 function SatelliteList () {
     
@@ -18,6 +18,26 @@ function SatelliteList () {
     const [editingSatellite, setEditingSatellite] = useState(null) ;
 
     const [search , setSearch ] = useState("");
+
+    useEffect(() => {
+        const savedSatellites = localStorage.getItem("satellites");
+
+        if (savedSatellites !== null) {
+            const parsedSatellites = JSON.parse(savedSatellites);
+
+            setSatellites(parsedSatellites);
+        }
+    }, []);
+
+    const isInitialMount = useRef(true);
+
+    useEffect(() => {
+        if (isInitialMount.current) {
+            isInitialMount.current = false;
+            return;
+        }
+        localStorage.setItem("satellites", JSON.stringify(satellites));
+    }, [satellites]);
 
     const addSatellite = () => {
 
