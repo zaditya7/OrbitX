@@ -2,14 +2,7 @@ import "./SatelliteList.css";
 import SatelliteCard from "./SatelliteCard";
 import {useState, useEffect, useRef} from "react" ;
 
-function SatelliteList () {
-    
-    const [satellites, setSatellites] = useState ( [
-            { name: "🛰 Hubble", status: "active", country: "USA" },
-            { name: "🛰 ISS", status: "active", country: "USA" },
-            { name: "🛰 Starlink", status: "offline", country: "USA" },
-            { name: "🛰 Chandrayaan-3", status: "maintanence", country: "India" }
-    ] ) ;
+function SatelliteList ({satellites, setSatellites}) {
 
     const [name , setName] = useState ("");
 
