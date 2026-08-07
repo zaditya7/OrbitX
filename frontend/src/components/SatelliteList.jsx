@@ -12,6 +12,10 @@ function SatelliteList ({satellites, setSatellites, changeStatus}) {
 
     const [search , setSearch ] = useState("");
 
+    const [statusFilter, setStatusFilter] = useState ("all");
+
+
+
     useEffect(() => {
         const savedSatellites = localStorage.getItem("satellites");
 
@@ -90,6 +94,14 @@ function SatelliteList ({satellites, setSatellites, changeStatus}) {
             <input type="text" placeholder ="Search satellites..." value = {search} 
             onChange={(e) => setSearch(e.target.value)} />
 
+            <button onClick = {() => setStatusFilter("all")} >All</button>
+
+            <button onClick = { () => setStatusFilter("active")}>Active</button>
+
+            <button onClick = { () => setStatusFilter("offline")}>Offline</button>
+
+            <button onClick = { () => setStatusFilter("maintenance")}>Maintenance</button>
+
             <input type = "text" placeholder="Satellite Name" value = {name} 
             onChange = {(e) => setName (e.target.value)} />
 
@@ -106,6 +118,10 @@ function SatelliteList ({satellites, setSatellites, changeStatus}) {
                 {satellites
                 .filter((satellite) =>
                 satellite.name.toLowerCase().includes(search.toLowerCase()))
+
+                .filter((satellite) => 
+                    statusFilter === "all" || 
+                    satellite.status === statusFilter)
 
                 .map((satellite) => (
                     <SatelliteCard 
