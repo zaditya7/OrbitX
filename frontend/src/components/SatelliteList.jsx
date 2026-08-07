@@ -14,6 +14,8 @@ function SatelliteList ({satellites, setSatellites, changeStatus}) {
 
     const [statusFilter, setStatusFilter] = useState ("all");
 
+    const [sortOrder, setSortOrder] = useState("none")
+
 
 
     useEffect(() => {
@@ -94,13 +96,26 @@ function SatelliteList ({satellites, setSatellites, changeStatus}) {
             <input type="text" placeholder ="Search satellites..." value = {search} 
             onChange={(e) => setSearch(e.target.value)} />
 
-            <button onClick = {() => setStatusFilter("all")} >All</button>
+            <select value={sortOrder}
+                onChange={(e) => setSortOrder(e.target.value)}>
+                <option value="none">None</option>
+                <option value="az">A-Z</option>
+                <option value="za">Z-A</option>
 
-            <button onClick = { () => setStatusFilter("active")}>Active</button>
+            </select>
 
-            <button onClick = { () => setStatusFilter("offline")}>Offline</button>
+            <select value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}>
 
-            <button onClick = { () => setStatusFilter("maintenance")}>Maintenance</button>
+                <option value = "all" >All</option>
+
+                <option value = "active">Active</option>
+
+                <option value = "offline">Offline</option>
+
+                <option value = "maintenance">Maintenance</option>
+                
+            </select>
 
             <input type = "text" placeholder="Satellite Name" value = {name} 
             onChange = {(e) => setName (e.target.value)} />
