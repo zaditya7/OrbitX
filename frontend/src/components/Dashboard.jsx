@@ -13,6 +13,22 @@ function Dashboard() {
             { name: "🛰 Chandrayaan-3", status: "maintanence", country: "India" }
     ] ) ;
 
+    const changeStatus = (name , status) => {
+
+        const updatedSatellites = satellites.map((satellite) => { 
+            if (satellite.name === name) {
+                return {
+                    ...satellite,
+                    status: status
+                };
+            }
+
+            return satellite;
+        });
+
+        setSatellites(updatedSatellites);
+    };
+
     return(
         <main>
             <h1>Dashboard</h1>
@@ -21,13 +37,14 @@ function Dashboard() {
                 <StatCard title="Total satellites" value={satellites.length}/>
                 <StatCard title="active missions" value= { satellites.filter( (satellite) =>
                     satellite.status ==="active").length} />
-                <StatCard title="Critical Alerts" value= { satellites.filter((satellite) => status === "offline").length}/>
+                <StatCard title="Critical Alerts" value= { satellites.filter((satellite) => satellite.status === "offline").length}/>
                 <StatCard title = "Signal Strength" value="98%"/>
             </div>
             <MissionStatus />
             <SatelliteList
                 satellites = {satellites}
-                setSatellites = {setSatellites} />
+                setSatellites = {setSatellites}
+                changeStatus = {changeStatus} />
         </main>
     );
 }

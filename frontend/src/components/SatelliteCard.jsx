@@ -1,6 +1,6 @@
 import "./SatelliteCard.css" ;
 
-function SatelliteCard({satellite, deleteSatellite, editSatellite })
+function SatelliteCard({satellite, deleteSatellite, editSatellite, changeStatus })
 {
     let statusText = " ";
     let statusColour = " ";
@@ -11,7 +11,7 @@ function SatelliteCard({satellite, deleteSatellite, editSatellite })
     else if (satellite.status === "offline") {
         statusText = "🔴 Offline"; statusColour = "red" ; }
 
-    else {
+    else if (satellite.status === "maintenance") {
         statusText = "🟡 Maintenance" ; statusColour = "gold" ; }
 
         
@@ -27,6 +27,12 @@ function SatelliteCard({satellite, deleteSatellite, editSatellite })
                 editSatellite(satellite)} > Edit</button>
             <button onClick={() => 
                 deleteSatellite(satellite.name)} > Delete</button>
+            <button onClick ={() =>
+                changeStatus(satellite.name,"active")}> Active </button>
+            <button onClick ={() =>
+                changeStatus(satellite.name,"offline")}>  Offline </button>
+            <button onClick ={() =>
+                changeStatus(satellite.name,"maintenance")}> Maintenance </button>
         </div>
     );
 }

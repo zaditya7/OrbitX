@@ -2,7 +2,7 @@ import "./SatelliteList.css";
 import SatelliteCard from "./SatelliteCard";
 import {useState, useEffect, useRef} from "react" ;
 
-function SatelliteList ({satellites, setSatellites}) {
+function SatelliteList ({satellites, setSatellites, changeStatus}) {
 
     const [name , setName] = useState ("");
 
@@ -112,7 +112,8 @@ function SatelliteList ({satellites, setSatellites}) {
                     key={satellite.name} 
                     satellite={satellite}
                     deleteSatellite = {deleteSatellite}
-                    editSatellite={editSatellite} />
+                    editSatellite={editSatellite}
+                    changeStatus = {changeStatus} />
                 ))}
 
             </div>
