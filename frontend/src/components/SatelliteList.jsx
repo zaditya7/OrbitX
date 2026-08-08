@@ -89,6 +89,26 @@ function SatelliteList ({satellites, setSatellites, changeStatus}) {
         setCountry(satellite.country);
     };
 
+    const filteredSatellites = satellites
+    
+        let result = satellites
+        
+            .filter((satellite) => 
+            satellite.name.toLowerCase().includes(search.toLowerCase()))
+
+            .filter((satellite) => 
+                statusFilter === "all" || satellite.status === statusFilter);
+
+            console.log(sortOrder);
+
+            if (sortOrder === "az") {
+                result.sort((a,b) => 
+                a.name.localeCompare(b.name)); }
+
+            else if (sortOrder ==="za") {
+                result.sort((a,b) => 
+                b.name.localeCompare(a.name)); }
+
     return(
         <div>
             <h2>🛰 Satellites</h2>
@@ -130,22 +150,17 @@ function SatelliteList ({satellites, setSatellites, changeStatus}) {
 
             <div className="satellite-list">
 
-                {satellites
-                .filter((satellite) =>
-                satellite.name.toLowerCase().includes(search.toLowerCase()))
-
-                .filter((satellite) => 
-                    statusFilter === "all" || 
-                    satellite.status === statusFilter)
-
-                .map((satellite) => (
-                    <SatelliteCard 
-                    key={satellite.name} 
-                    satellite={satellite}
-                    deleteSatellite = {deleteSatellite}
-                    editSatellite={editSatellite}
-                    changeStatus = {changeStatus} />
-                ))}
+                { result
+                
+                    .map((satellite) => (
+                        <SatelliteCard 
+                        key={satellite.name} 
+                        satellite={satellite}
+                        deleteSatellite = {deleteSatellite}
+                        editSatellite={editSatellite}
+                        changeStatus = {changeStatus} />
+                    ))
+                }
 
             </div>
         </div>

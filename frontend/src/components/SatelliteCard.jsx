@@ -23,16 +23,21 @@ function SatelliteCard({satellite, deleteSatellite, editSatellite, changeStatus 
 
             <p>🌍{satellite.country}</p>
 
-            <button onClick ={() => 
-                editSatellite(satellite)} > Edit</button>
-            <button onClick={() => 
-                deleteSatellite(satellite.name)} > Delete</button>
-            <button onClick ={() =>
-                changeStatus(satellite.name,"active")}> Active </button>
-            <button onClick ={() =>
-                changeStatus(satellite.name,"offline")}>  Offline </button>
-            <button onClick ={() =>
-                changeStatus(satellite.name,"maintenance")}> Maintenance </button>
+            <button onClick ={() => editSatellite(satellite)} > Edit</button>
+
+            <button onClick={() => deleteSatellite(satellite.name)} > Delete</button>
+            
+            <select value={satellite.status}
+                onChange={(e) => changeStatus(satellite.name, e.target.value)}>
+
+            <option value="active"> Active </option>
+
+            <option value="offline">  Offline </option>
+            
+            <option value="maintenance"> Maintenance </option>
+
+            </select>
+
         </div>
     );
 }
