@@ -6,12 +6,40 @@ import { useState } from "react";
 
 function Dashboard() {
 
-    const [satellites, setSatellites] = useState ( [
-            { name: "🛰 Hubble", status: "active", country: "USA" },
-            { name: "🛰 ISS", status: "active", country: "USA" },
-            { name: "🛰 Starlink", status: "offline", country: "USA" },
-            { name: "🛰 Chandrayaan-3", status: "maintanence", country: "India" }
-    ] ) ;
+    const [satellites, setSatellites] = useState([
+        {
+            name: "Hubble",
+            status: "active",
+            country: "USA",
+
+            battery: 20,
+            temperature: -18,
+            signal: 47,
+            altitude: 8.9,
+
+            history: {
+            battery: [],
+            temperature: [],
+            signal: []
+            }
+        },
+        {
+            name: "ISS",
+            status: "active",
+            country: "USA",
+
+            battery: 19,
+            temperature: 30,
+            signal: 43,
+            altitude: 0.2,
+
+            history: {
+            battery: [],
+            temperature: [],
+            signal: []
+            }
+        }
+        ]);
 
     const changeStatus = (name , status) => {
 

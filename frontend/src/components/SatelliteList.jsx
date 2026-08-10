@@ -24,63 +24,71 @@ function SatelliteList ({satellites, setSatellites, changeStatus}) {
         if (savedSatellites !== null) {
             const parsedSatellites = JSON.parse(savedSatellites);
 
-            setSatellites(parsedSatellites);
+            const fixedSatellites = parsedSatellites.map((sat) => ({
+                ...sat,
+                history: sat.history || {
+                    battery: [],
+                    temperature: [],
+                    signal: []
+                }
+            }));
+
+            setSatellites(fixedSatellites);
         }
     }, []);
 
     useEffect(() => {
         const interval = setInterval(() => {
             setSatellites((prev) =>
-            prev.map((sat) => {
+                prev.map((sat) => {
 
-                // 🔋 Battery
-                let newBattery = sat.battery - Math.random() * 0.5;
-                if (newBattery <= 0) newBattery = 100;
+                    // 🔋 Battery
+                    let newBattery = sat.battery - Math.random() * 0.5;
+                    if (newBattery <= 0) newBattery = 100;
 
-                // 🌡 Temp
-                const newTemp = Math.max(
-                -20,
-                Math.min(50, sat.temperature + (Math.random() * 2 - 1))
-                );
+                    // 🌡 Temp
+                    const newTemp = Math.max(
+                        -20,
+                        Math.min(50, sat.temperature + (Math.random() * 2 - 1))
+                    );
 
-                // 📶 Signal
-                let newSignal = sat.signal + (Math.random() * 4 - 2);
-                newSignal = Math.max(20, Math.min(100, newSignal));
+                    // 📶 Signal
+                    let newSignal = sat.signal + (Math.random() * 4 - 2);
+                    newSignal = Math.max(20, Math.min(100, newSignal));
 
-                // 🛰 Altitude
-                let newAltitude = sat.altitude + (Math.random() * 2 - 1);
-                if (newAltitude < 0) newAltitude = 0;
+                    // 🛰 Altitude
+                    let newAltitude = sat.altitude + (Math.random() * 2 - 1);
+                    if (newAltitude < 0) newAltitude = 0;
 
-                // 🚨 ADD ALERTS HERE 👇
-                let alerts = [];
+                    // 🚨 Alerts
+                    let alerts = [];
 
-                if (newBattery < 20) {
-                alerts.push("Low Battery");
-                }
+                    if (newBattery < 20) alerts.push("Low Battery");
+                    if (newTemp > 40) alerts.push("High Temperature");
+                    if (newSignal < 30) alerts.push("Weak Signal");
 
-                if (newTemp > 40) {
-                alerts.push("High Temperature");
-                }
+                    // 📊 History
+                    const newHistory = {
+                        battery: [...(sat.history?.battery || []), newBattery].slice(-20),
+                        temperature: [...(sat.history?.temperature || []), newTemp].slice(-20),
+                        signal: [...(sat.history?.signal || []), newSignal].slice(-20)
+                    };
 
-                if (newSignal < 30) {
-                alerts.push("Weak Signal");
-                }
-
-                // 🔥 RETURN WITH ALERTS
-                return {
-                ...sat,
-                battery: newBattery,
-                temperature: newTemp,
-                signal: newSignal,
-                altitude: newAltitude,
-                alerts: alerts
-                };
-            })
+                    return {
+                        ...sat,
+                        battery: newBattery,
+                        temperature: newTemp,
+                        signal: newSignal,
+                        altitude: newAltitude,
+                        alerts: alerts,
+                        history: newHistory
+                    };
+                })
             );
         }, 1000);
 
         return () => clearInterval(interval);
-        }, []);
+    }, []);
 
     const isInitialMount = useRef(true);
 
@@ -106,8 +114,14 @@ function SatelliteList ({satellites, setSatellites, changeStatus}) {
                 battery: Math.floor(Math.random() * 50) + 50,
                 temperature: Math.floor(Math.random() * 20) + 10,
                 signal: Math.floor(Math.random() * 40) + 60,
-                altitude: Math.floor(Math.random() * 200) + 400
-                };
+                altitude: Math.floor(Math.random() * 200) + 400,
+
+                history: {
+                    battery: [],
+                    temperature: [],
+                    signal: []
+                }
+            };
 
             setSatellites([...satellites, newSatellite]);
             
@@ -146,10 +160,8 @@ function SatelliteList ({satellites, setSatellites, changeStatus}) {
         setName(satellite.name);
         setCountry(satellite.country);
     };
-
-    const filteredSatellites = satellites
     
-        let result = satellites
+        let result = [...satellites]
         
             .filter((satellite) => 
             satellite.name.toLowerCase().includes(search.toLowerCase()))

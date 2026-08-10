@@ -1,7 +1,11 @@
+import { useState } from "react";
 import "./SatelliteCard.css" ;
+import TelemetryChart from "./TelemetryChart";
 
 function SatelliteCard({satellite, deleteSatellite, editSatellite, changeStatus })
 {
+    const [chartType, setChartType] = useState("battery");
+
     let statusText = " ";
     let statusColour = " ";
 
@@ -27,6 +31,21 @@ function SatelliteCard({satellite, deleteSatellite, editSatellite, changeStatus 
             <p>🌡 Temp: {satellite.temperature?.toFixed(1)}°C</p>
             <p>📶 Signal: {satellite.signal?.toFixed(1)}%</p>
             <p>🛰 Altitude: {satellite.altitude?.toFixed(1)} km</p>
+            <div style={{ marginTop: "10px" }}>
+                <button onClick={() => setChartType("battery")}>Battery</button>
+                <button onClick={() => setChartType("signal")}>Signal</button>
+            </div>
+
+            {satellite.history?.battery?.length > 0 && satellite.history?.signal?.length > 0 && (
+                <>
+                    {chartType === "battery" && (
+                        <TelemetryChart data={satellite.history.battery} label="Battery" />
+                    )}
+                    {chartType === "signal" && (
+                        <TelemetryChart data={satellite.history.signal} label="Signal" />
+                    )}
+                </>
+            )}
 
             {satellite.alerts && satellite.alerts.length > 0 && (
                 <div style={{ marginTop: "10px" }}>
