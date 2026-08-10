@@ -1,5 +1,5 @@
 .satellite-card {
-    width: 300px;
+    width: 100%;
     background-color: #1f2937;
     color: white;
     padding: 20px;
@@ -13,4 +13,16 @@
 
 .satellite-card p {
     margin: 5px 0;
+}
+
+.alert {
+  color: #ff4d4d;
+  font-weight: bold;
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0.5;
+  }
 }

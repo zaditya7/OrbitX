@@ -23,6 +23,19 @@ function SatelliteCard({satellite, deleteSatellite, editSatellite, changeStatus 
 
             <p>🌍{satellite.country}</p>
 
+            <p>🔋 Battery: {satellite.battery?.toFixed(1)}%</p>
+            <p>🌡 Temp: {satellite.temperature?.toFixed(1)}°C</p>
+            <p>📶 Signal: {satellite.signal?.toFixed(1)}%</p>
+            <p>🛰 Altitude: {satellite.altitude?.toFixed(1)} km</p>
+
+            {satellite.alerts && satellite.alerts.length > 0 && (
+                <div style={{ marginTop: "10px" }}>
+                    {satellite.alerts.map((alert, index) => (
+                    <p key={index} className="alert">⚠ {alert}</p>
+                    ))}
+                </div>
+                )}
+
             <button onClick ={() => editSatellite(satellite)} > Edit</button>
 
             <button onClick={() => deleteSatellite(satellite.name)} > Delete</button>

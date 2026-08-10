@@ -28,6 +28,60 @@ function SatelliteList ({satellites, setSatellites, changeStatus}) {
         }
     }, []);
 
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setSatellites((prev) =>
+            prev.map((sat) => {
+
+                // 🔋 Battery
+                let newBattery = sat.battery - Math.random() * 0.5;
+                if (newBattery <= 0) newBattery = 100;
+
+                // 🌡 Temp
+                const newTemp = Math.max(
+                -20,
+                Math.min(50, sat.temperature + (Math.random() * 2 - 1))
+                );
+
+                // 📶 Signal
+                let newSignal = sat.signal + (Math.random() * 4 - 2);
+                newSignal = Math.max(20, Math.min(100, newSignal));
+
+                // 🛰 Altitude
+                let newAltitude = sat.altitude + (Math.random() * 2 - 1);
+                if (newAltitude < 0) newAltitude = 0;
+
+                // 🚨 ADD ALERTS HERE 👇
+                let alerts = [];
+
+                if (newBattery < 20) {
+                alerts.push("Low Battery");
+                }
+
+                if (newTemp > 40) {
+                alerts.push("High Temperature");
+                }
+
+                if (newSignal < 30) {
+                alerts.push("Weak Signal");
+                }
+
+                // 🔥 RETURN WITH ALERTS
+                return {
+                ...sat,
+                battery: newBattery,
+                temperature: newTemp,
+                signal: newSignal,
+                altitude: newAltitude,
+                alerts: alerts
+                };
+            })
+            );
+        }, 1000);
+
+        return () => clearInterval(interval);
+        }, []);
+
     const isInitialMount = useRef(true);
 
     useEffect(() => {
@@ -46,10 +100,14 @@ function SatelliteList ({satellites, setSatellites, changeStatus}) {
         if (editingSatellite === null ) {
 
             const newSatellite = {
-            name: name ,
-            status:"active" ,
-            country: country
-            };
+                name: name,
+                status: "active",
+                country: country,
+                battery: Math.floor(Math.random() * 50) + 50,
+                temperature: Math.floor(Math.random() * 20) + 10,
+                signal: Math.floor(Math.random() * 40) + 60,
+                altitude: Math.floor(Math.random() * 200) + 400
+                };
 
             setSatellites([...satellites, newSatellite]);
             
@@ -98,8 +156,6 @@ function SatelliteList ({satellites, setSatellites, changeStatus}) {
 
             .filter((satellite) => 
                 statusFilter === "all" || satellite.status === statusFilter);
-
-            console.log(sortOrder);
 
             if (sortOrder === "az") {
                 result.sort((a,b) => 
