@@ -1,0 +1,113 @@
+.satellite-detail-panel {
+  background: rgba(30, 41, 59, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border-radius: 14px;
+  padding: 20px;
+  height: fit-content;
+}
+
+.satellite-detail-panel.empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+  min-height: 200px;
+  text-align: center;
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #94a3b8;
+  font-size: 13px;
+  margin-bottom: 10px;
+}
+
+.status-pill {
+  border: 1px solid;
+  border-radius: 100px;
+  padding: 2px 10px;
+  font-size: 12px;
+}
+
+.satellite-name-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.satellite-name-row .dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.satellite-name-row h2 {
+  font-size: 20px;
+}
+
+.satellite-illustration {
+  text-align: center;
+  font-size: 64px;
+  margin: 16px 0;
+}
+
+.info-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: #94a3b8;
+}
+
+.info-row strong {
+  color: #e2e8f0;
+}
+
+.telemetry-heading {
+  font-size: 14px;
+  color: #94a3b8;
+  margin-bottom: 10px;
+}
+
+.telemetry-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  font-size: 12px;
+}
+
+.telemetry-label {
+  width: 90px;
+  color: #cbd5f5;
+}
+
+.telemetry-track {
+  flex: 1;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 100px;
+  overflow: hidden;
+}
+
+.telemetry-fill {
+  height: 100%;
+  border-radius: 100px;
+  transition: width 0.3s;
+}
+
+.telemetry-value {
+  width: 45px;
+  text-align: right;
+  color: #e2e8f0;
+}

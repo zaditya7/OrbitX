@@ -1,0 +1,61 @@
+.mission-stats {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.mission-stat-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(30, 41, 59, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  padding: 14px 18px;
+  min-width: 150px;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.stat-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: #e2e8f0;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.dot.active {
+  background: #4ade80;
+  box-shadow: 0 0 8px #4ade80;
+}
+.dot.total {
+  background: #38bdf8;
+  box-shadow: 0 0 8px #38bdf8;
+}
+.dot.missions {
+  background: #818cf8;
+  box-shadow: 0 0 8px #818cf8;
+}
+
+.clock-icon {
+  font-size: 20px;
+}
+.clock-time {
+  font-size: 16px;
+  font-weight: 700;
+  color: #e2e8f0;
+}
+.clock-date {
+  font-size: 12px;
+  color: #94a3b8;
+}

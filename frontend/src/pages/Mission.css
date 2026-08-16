@@ -1,0 +1,25 @@
+.mission-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.mission-subtitle {
+  color: #38bdf8;
+  margin-top: 4px;
+}
+
+.mission-content {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+@media (max-width: 900px) {
+  .mission-content {
+    grid-template-columns: 1fr;
+  }
+}

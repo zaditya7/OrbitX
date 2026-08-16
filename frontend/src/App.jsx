@@ -18,6 +18,7 @@ function App() {
       temperature: -18,
       signal: 47,
       altitude: 8.9,
+      launchDate: "24 Apr 1990",
       alerts: [],
       history: {
         battery: [],
@@ -126,7 +127,7 @@ function App() {
               path="/analytics"
               element={<Analytics satellites={satellites} />}
             />
-            <Route path="/mission" element={<Mission />} />
+            <Route path="/mission" element={<Mission satellites={satellites} />} />
           </Routes>
         </div>
       </div>
