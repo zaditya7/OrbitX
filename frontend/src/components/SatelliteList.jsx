@@ -16,7 +16,35 @@ function SatelliteList ({satellites, setSatellites, changeStatus}) {
 
     const [sortOrder, setSortOrder] = useState("none")
 
+    const generateAlerts = (satellite) => {
+        const alerts = [];
 
+        if (satellite.battery < 30) {
+            alerts.push({
+                type: "battery",
+                message: `${satellite.name}: Low battery`,
+                level: "critical"
+            });
+        }
+
+        if (satellite.temperature > 50 || satellite.temperature < -20) {
+            alerts.push({
+                type: "temperature",
+                message: `${satellite.name}: Temperature critical`,
+                level: "critical"
+            });
+        }
+
+        if (satellite.signal < 30) {
+            alerts.push({
+                type: "signal",
+                message: `${satellite.name}: Weak signal`,
+                level: "warning"
+            });
+        }
+
+        return alerts;
+    };
 
     useEffect(() => {
         const savedSatellites = localStorage.getItem("satellites");
@@ -60,12 +88,15 @@ function SatelliteList ({satellites, setSatellites, changeStatus}) {
                     let newAltitude = sat.altitude + (Math.random() * 2 - 1);
                     if (newAltitude < 0) newAltitude = 0;
 
-                    // 🚨 Alerts
-                    let alerts = [];
+                    const updated = {
+                        ...sat,
+                        battery: newBattery,
+                        temperature: newTemp,
+                        signal: newSignal,
+                        altitude: newAltitude
+                    };
 
-                    if (newBattery < 20) alerts.push("Low Battery");
-                    if (newTemp > 40) alerts.push("High Temperature");
-                    if (newSignal < 30) alerts.push("Weak Signal");
+                    const alerts = generateAlerts(updated);
 
                     // 📊 History
                     const newHistory = {
@@ -75,11 +106,7 @@ function SatelliteList ({satellites, setSatellites, changeStatus}) {
                     };
 
                     return {
-                        ...sat,
-                        battery: newBattery,
-                        temperature: newTemp,
-                        signal: newSignal,
-                        altitude: newAltitude,
+                        ...updated,
                         alerts: alerts,
                         history: newHistory
                     };

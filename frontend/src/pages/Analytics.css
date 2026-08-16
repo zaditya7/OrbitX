@@ -1,0 +1,51 @@
+.analytics-cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin: 20px 0;
+}
+
+.analytics-card {
+  background: rgba(30, 41, 59, 0.6);
+  padding: 18px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  transition: 0.3s;
+}
+
+.analytics-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.2);
+}
+
+.analytics-card h3 {
+  margin: 0 0 10px;
+  font-size: 15px;
+  color: #94a3b8;
+}
+
+.analytics-card strong {
+  font-size: 24px;
+  color: #e2e8f0;
+}
+
+.chart-controls {
+  display: flex;
+  gap: 10px;
+  margin: 15px 0;
+}
+
+.chart-controls button {
+  background: #17345f;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.chart-controls button:hover {
+  background: #244b80;
+}

@@ -1,26 +1,32 @@
+import { Link } from "react-router-dom";
 import "./Sidebar.css";
 
-function Sidebar() {
-    const menuItems = [
-        "Dashboard",
-        "Satellite",
-        "Mission",
-        "Alert",
-        "Analytics",
-        "Settings",
-    ];
-    return(
-        <aside className="sidebar">
-            <h3>Mission Menu</h3>
+function Sidebar({ alertCount }) {
+  return (
+    <div className="sidebar">
+      <h2>Mission Menu</h2>
 
-            <ul>
-                {menuItems.map((item) => (
-                    <li key={item}>{item}</li>
-                ))}
-            </ul>
-            
-        </aside>
-    );
+      <ul>
+        <li>
+          <Link to="/">Dashboard</Link>
+        </li>
+        <li>
+          <Link to="/satellites">Satellite</Link>
+        </li>
+        <li>
+          <Link to="/alerts">
+            Alerts
+            {alertCount > 0 && (
+              <span className="alert-badge">{alertCount}</span>
+            )}
+          </Link>
+        </li>
+        <li>
+          <Link to="/analytics">Analytics</Link>
+        </li>
+      </ul>
+    </div>
+  );
 }
 
 export default Sidebar;

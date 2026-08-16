@@ -2,59 +2,21 @@ import StatCard from "./StatCard";
 import "./Dashboard.css";
 import MissionStatus from "./MissionStatus";
 import SatelliteList from "./SatelliteList";
-import { useState } from "react";
 
-function Dashboard() {
-
-    const [satellites, setSatellites] = useState([
-        {
-            name: "Hubble",
-            status: "active",
-            country: "USA",
-
-            battery: 20,
-            temperature: -18,
-            signal: 47,
-            altitude: 8.9,
-
-            history: {
-            battery: [],
-            temperature: [],
-            signal: []
-            }
-        },
-        {
-            name: "ISS",
-            status: "active",
-            country: "USA",
-
-            battery: 19,
-            temperature: 30,
-            signal: 43,
-            altitude: 0.2,
-
-            history: {
-            battery: [],
-            temperature: [],
-            signal: []
-            }
-        }
-        ]);
-
+function Dashboard({ satellites, setSatellites }) {
     const changeStatus = (name , status) => {
+        setSatellites((prevSatellites) =>
+            prevSatellites.map((satellite) => {
+                if (satellite.name === name) {
+                    return {
+                        ...satellite,
+                        status: status
+                    };
+                }
 
-        const updatedSatellites = satellites.map((satellite) => { 
-            if (satellite.name === name) {
-                return {
-                    ...satellite,
-                    status: status
-                };
-            }
-
-            return satellite;
-        });
-
-        setSatellites(updatedSatellites);
+                return satellite;
+            })
+        );
     };
 
     return(

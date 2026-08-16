@@ -50,7 +50,13 @@ function SatelliteCard({satellite, deleteSatellite, editSatellite, changeStatus 
             {satellite.alerts && satellite.alerts.length > 0 && (
                 <div style={{ marginTop: "10px" }}>
                     {satellite.alerts.map((alert, index) => (
-                    <p key={index} className="alert">⚠ {alert}</p>
+                    <p
+                        key={index}
+                        className="alert"
+                        style={{ color: alert.level === "critical" ? "red" : "orange" }}
+                    >
+                        ⚠ {alert.message}
+                    </p>
                     ))}
                 </div>
                 )}
