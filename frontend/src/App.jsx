@@ -6,6 +6,7 @@ import Dashboard from "./pages/Dashboard";
 import Satellites from "./pages/Satellites";
 import Alerts from "./pages/Alerts";
 import Analytics from "./pages/Analytics";
+import Mission from "./pages/Mission";
 
 function App() {
   const [satellites, setSatellites] = useState([
@@ -125,6 +126,7 @@ function App() {
               path="/analytics"
               element={<Analytics satellites={satellites} />}
             />
+            <Route path="/mission" element={<Mission />} />
           </Routes>
         </div>
       </div>

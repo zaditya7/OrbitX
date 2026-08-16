@@ -14,6 +14,9 @@ function Sidebar({ alertCount }) {
           <Link to="/satellites">Satellite</Link>
         </li>
         <li>
+          <Link to="/mission">Mission</Link>
+        </li>
+        <li>
           <Link to="/alerts">
             Alerts
             {alertCount > 0 && (
