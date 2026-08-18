@@ -7,6 +7,80 @@ import Satellites from "./pages/Satellites";
 import Alerts from "./pages/Alerts";
 import Analytics from "./pages/Analytics";
 import Mission from "./pages/Mission";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
+import Admin from "./pages/Admin";
+import ProtectedRoute from "./components/ProtectedRoute";
+
+function AppLayout({ satellites, setSatellitesWithAlerts, alertCount }) {
+  return (
+    <div style={{ display: "flex" }}>
+      <Sidebar alertCount={alertCount} />
+
+      <div style={{ flex: 1, padding: "20px" }}>
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <Dashboard
+                  satellites={satellites}
+                  setSatellites={setSatellitesWithAlerts}
+                />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/satellites"
+            element={
+              <ProtectedRoute>
+                <Satellites
+                  satellites={satellites}
+                  setSatellites={setSatellitesWithAlerts}
+                />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/alerts"
+            element={
+              <ProtectedRoute>
+                <Alerts satellites={satellites} />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/analytics"
+            element={
+              <ProtectedRoute>
+                <Analytics satellites={satellites} />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/mission"
+            element={
+              <ProtectedRoute>
+                <Mission satellites={satellites} />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute adminOnly>
+                <Admin
+                  satellites={satellites}
+                  setSatellites={setSatellitesWithAlerts}
+                />
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      </div>
+    </div>
+  );
+}
 
 function App() {
   const [satellites, setSatellites] = useState([
@@ -99,38 +173,20 @@ function App() {
 
   return (
     <Router>
-      <div style={{ display: "flex" }}>
-        <Sidebar alertCount={alertCount} />
-
-        <div style={{ flex: 1, padding: "20px" }}>
-          <Routes>
-            <Route
-              path="/"
-              element={
-                <Dashboard
-                  satellites={satellites}
-                  setSatellites={setSatellitesWithAlerts}
-                />
-              }
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route
+          path="/*"
+          element={
+            <AppLayout
+              satellites={satellites}
+              setSatellitesWithAlerts={setSatellitesWithAlerts}
+              alertCount={alertCount}
             />
-            <Route
-              path="/satellites"
-              element={
-                <Satellites
-                  satellites={satellites}
-                  setSatellites={setSatellitesWithAlerts}
-                />
-              }
-            />
-            <Route path="/alerts" element={<Alerts satellites={satellites} />} />
-            <Route
-              path="/analytics"
-              element={<Analytics satellites={satellites} />}
-            />
-            <Route path="/mission" element={<Mission satellites={satellites} />} />
-          </Routes>
-        </div>
-      </div>
+          }
+        />
+      </Routes>
     </Router>
   );
 }
