@@ -19,6 +19,15 @@ function Dashboard({ satellites, setSatellites }) {
         );
     };
 
+    const averageSignal = satellites.length
+        ? satellites.reduce((sum, satellite) => sum + (Number(satellite.signal) || 0), 0) / satellites.length
+        : 0;
+
+    const criticalAlertsCount = satellites.reduce(
+        (count, satellite) => count + ((satellite.alerts || []).filter((alert) => alert.level === "critical").length),
+        0
+    );
+
     return(
         <main>
             <h1>Dashboard</h1>
@@ -27,8 +36,8 @@ function Dashboard({ satellites, setSatellites }) {
                 <StatCard title="Total satellites" value={satellites.length}/>
                 <StatCard title="active missions" value= { satellites.filter( (satellite) =>
                     satellite.status ==="active").length} />
-                <StatCard title="Critical Alerts" value= { satellites.filter((satellite) => satellite.status === "offline").length}/>
-                <StatCard title = "Signal Strength" value="98%"/>
+                <StatCard title="Critical Alerts" value={criticalAlertsCount}/>
+                <StatCard title = "Signal Strength" value={`${Math.round(averageSignal)}%`}/>
             </div>
             <MissionStatus />
             <SatelliteList

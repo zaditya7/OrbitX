@@ -9,8 +9,13 @@ function LiveClock() {
     return () => clearInterval(id);
   }, []);
 
-  const time = now.toISOString().substring(11, 19);
+  const time = now.toLocaleTimeString("en-IN", {
+    timeZone: "Asia/Kolkata",
+    hour12: false
+  });
+
   const date = now.toLocaleDateString("en-GB", {
+    timeZone: "Asia/Kolkata",
     day: "2-digit",
     month: "short",
     year: "numeric"
@@ -20,7 +25,7 @@ function LiveClock() {
     <div className="mission-stat-card clock-card">
       <span className="clock-icon">🕒</span>
       <div>
-        <div className="clock-time">{time} UTC</div>
+        <div className="clock-time">{time} IST</div>
         <div className="clock-date">{date}</div>
       </div>
     </div>
