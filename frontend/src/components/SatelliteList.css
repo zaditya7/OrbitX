@@ -1,11 +1,97 @@
+.satellite-list-heading {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.satellite-list-heading h2 {
+  margin: 0;
+}
+
+.satellite-count {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.satellite-toolbar {
+  background: rgba(30, 41, 59, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border-radius: 14px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.toolbar-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.satellite-toolbar input,
+.satellite-toolbar select {
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 9px 12px;
+  color: #e2e8f0;
+  font-size: 13px;
+  min-width: 150px;
+}
+
+.satellite-toolbar input:focus,
+.satellite-toolbar select:focus {
+  outline: none;
+  border-color: #3b82f6;
+}
+
+.search-field {
+  position: relative;
+  flex: 1;
+  min-width: 200px;
+}
+
+.search-field input {
+  width: 100%;
+  padding-left: 34px;
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 12px;
+  opacity: 0.6;
+}
+
+.add-row input {
+  flex: 1;
+  min-width: 160px;
+}
+
+.add-satellite-btn {
+  background: #3b82f6;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.add-satellite-btn:hover {
+  background: #2563eb;
+}
+
 .satellite-list {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: 20px;
-  padding: 20px;
 }
 
-h2 {
-  margin: 8px;
+.no-results {
+  color: #94a3b8;
+  text-align: center;
+  padding: 30px 0;
 }
-
