@@ -9,8 +9,6 @@ models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="OrbitX API")
 
-# Dev-friendly: allows any localhost port (Vite sometimes picks 5173, 5174, 5175...).
-# Tighten this to your real frontend origin before deploying anywhere.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
