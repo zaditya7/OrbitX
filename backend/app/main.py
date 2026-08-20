@@ -14,7 +14,7 @@ app = FastAPI(title="OrbitX API")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "https://orbitx-28sq.onrender.com",  # replace with your real Vercel URL
+        "https://orbit-x-omega.vercel.app",  # replace with your real Vercel URL
     ],
     allow_origin_regex=r"http://localhost:\d+",
     allow_credentials=True,
