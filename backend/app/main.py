@@ -15,6 +15,8 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "https://orbit-x-omega.vercel.app",  # replace with your real Vercel URL
+        "https://orbit-x-git-main-zaditya7s-projects.vercel.app",
+        "https://orbit-dquhwpatc-zaditya7s-projects.vercel.app"
     ],
     allow_origin_regex=r"http://localhost:\d+",
     allow_credentials=True,
