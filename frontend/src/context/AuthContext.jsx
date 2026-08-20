@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState, useCallback } from "rea
 
 const AuthContext = createContext(null);
 
-const API_BASE = "http://localhost:8000";
+const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:8000";
 const TOKEN_KEY = "orbitx_token";
 
 export function AuthProvider({ children }) {
