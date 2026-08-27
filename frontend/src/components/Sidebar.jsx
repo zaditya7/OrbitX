@@ -28,13 +28,11 @@ function Sidebar({ alertCount }) {
   return (
     <div className="sidebar">
       <div className="sidebar-brand">
-        <div className="brand-mark">
-          <span className="brand-mark-dot" />
-        </div>
-        <div>
-          <div className="brand-title">ORBITX</div>
-          <div className="brand-subtitle">Mission Control</div>
-        </div>
+        <img
+          className="sidebar-logo"
+          src="/orbitxlogo.png"
+          alt="OrbitX Mission Control"
+        />
       </div>
 
       <div className="sidebar-divider" />
