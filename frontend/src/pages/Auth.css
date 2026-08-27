@@ -3,7 +3,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: radial-gradient(circle at top, #0b1a2a, #020617);
 }
 
 .auth-card {

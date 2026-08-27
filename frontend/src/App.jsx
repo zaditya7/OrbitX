@@ -11,6 +11,8 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Admin from "./pages/Admin";
 import ProtectedRoute from "./components/ProtectedRoute";
+import SpaceBackground from "./components/SpaceBackground";
+
 
 function AppLayout({ satellites, setSatellitesWithAlerts, alertCount }) {
   return (
@@ -172,6 +174,8 @@ function App() {
   );
 
   return (
+      <>
+    <SpaceBackground />
     <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Routes>
         <Route path="/login" element={<Login />} />
@@ -188,6 +192,7 @@ function App() {
         />
       </Routes>
     </Router>
+    </>
   );
 }
 
