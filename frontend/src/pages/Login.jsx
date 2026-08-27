@@ -28,7 +28,7 @@ function Login() {
   return (
     <div className="auth-page">
       <form className="auth-card" onSubmit={handleSubmit}>
-        <h1>🛰 OrbitX</h1>
+        <img className="auth-logo" src="/orbitxlogo.png" alt="OrbitX Mission Control" />
         <p className="auth-subtitle">Sign in to Mission Control</p>
 
         {error && <p className="auth-error">{error}</p>}
