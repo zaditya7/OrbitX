@@ -1,0 +1,138 @@
+.alerts-page {
+  padding-bottom: 40px;
+}
+
+.alerts-header h1 {
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.alerts-subtitle {
+  color: #94a3b8;
+  font-size: 14px;
+  margin-top: 4px;
+  margin-bottom: 24px;
+}
+
+.alerts-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 16px;
+  margin-bottom: 26px;
+}
+
+.alerts-summary-card {
+  background: rgba(30, 41, 59, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border-radius: 14px;
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.summary-label {
+  font-size: 12px;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.summary-value {
+  font-size: 26px;
+  font-weight: 700;
+  color: #e2e8f0;
+}
+
+.alerts-summary-card.critical .summary-value {
+  color: #f87171;
+}
+
+.alerts-summary-card.warning .summary-value {
+  color: #facc15;
+}
+
+.alerts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.alert-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: rgba(30, 41, 59, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-left: 4px solid transparent;
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  padding: 14px 18px;
+}
+
+.alert-card.critical {
+  border-left-color: #f87171;
+}
+
+.alert-card.warning {
+  border-left-color: #facc15;
+}
+
+.alert-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.alert-body {
+  flex: 1;
+}
+
+.alert-satellite {
+  font-size: 13px;
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
+.alert-message {
+  font-size: 13px;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+.alert-badge {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 4px 10px;
+  border-radius: 100px;
+  flex-shrink: 0;
+}
+
+.alert-badge.critical {
+  background: rgba(248, 113, 113, 0.15);
+  color: #f87171;
+}
+
+.alert-badge.warning {
+  background: rgba(250, 204, 21, 0.15);
+  color: #facc15;
+}
+
+.alerts-empty {
+  text-align: center;
+  padding: 80px 20px;
+  color: #94a3b8;
+}
+
+.alerts-empty-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.alerts-empty h2 {
+  color: #e2e8f0;
+  font-size: 20px;
+  margin-bottom: 8px;
+}

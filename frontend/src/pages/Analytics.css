@@ -1,8 +1,77 @@
+.analytics-page {
+  padding-bottom: 40px;
+}
+
+.analytics-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.analytics-header h1 {
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.analytics-subtitle {
+  color: #94a3b8;
+  font-size: 14px;
+  margin-top: 4px;
+}
+
+.analytics-empty {
+  color: #94a3b8;
+  margin-top: 10px;
+}
+
+.satellite-select-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(30, 41, 59, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 8px 30px 8px 14px;
+  backdrop-filter: blur(10px);
+}
+
+.satellite-select-icon {
+  font-size: 14px;
+}
+
+.satellite-select-wrapper select {
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  border: none;
+  color: #e2e8f0;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.satellite-select-wrapper select:focus {
+  outline: none;
+}
+
+.satellite-select-wrapper::after {
+  content: "▾";
+  position: absolute;
+  right: 14px;
+  color: #94a3b8;
+  pointer-events: none;
+  font-size: 12px;
+}
+
 .analytics-cards {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 16px;
-  margin: 20px 0;
+  margin-bottom: 20px;
 }
 
 .analytics-card {
@@ -30,22 +99,103 @@
   color: #e2e8f0;
 }
 
+.status-text {
+  text-transform: capitalize;
+}
+
+.status-text.active {
+  color: #4ade80;
+}
+.status-text.offline {
+  color: #f87171;
+}
+.status-text.maintenance {
+  color: #facc15;
+}
+
 .chart-controls {
   display: flex;
   gap: 10px;
-  margin: 15px 0;
+  margin: 0 0 20px;
 }
 
-.chart-controls button {
-  background: #17345f;
-  color: white;
-  border: none;
-  padding: 8px 14px;
-  border-radius: 7px;
+.chart-toggle-btn {
+  background: rgba(30, 41, 59, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #94a3b8;
+  padding: 9px 16px;
+  border-radius: 100px;
+  font-weight: 600;
+  font-size: 13px;
   cursor: pointer;
   transition: 0.2s;
 }
 
-.chart-controls button:hover {
-  background: #244b80;
+.chart-toggle-btn:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.chart-toggle-btn.battery.active {
+  background: rgba(74, 222, 128, 0.18);
+  border-color: #4ade80;
+  color: #4ade80;
+}
+
+.chart-toggle-btn.signal.active {
+  background: rgba(56, 189, 248, 0.18);
+  border-color: #38bdf8;
+  color: #38bdf8;
+}
+
+.chart-toggle-btn.temperature.active {
+  background: rgba(248, 113, 113, 0.18);
+  border-color: #f87171;
+  color: #f87171;
+}
+
+.chart-card {
+  background: rgba(30, 41, 59, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  padding: 20px;
+}
+
+.chart-tooltip {
+  background: rgba(15, 23, 42, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 10px 14px;
+  backdrop-filter: blur(10px);
+}
+
+.chart-tooltip-label {
+  font-size: 11px;
+  color: #94a3b8;
+  margin-bottom: 6px;
+}
+
+.chart-tooltip-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  padding: 2px 0;
+}
+
+.chart-tooltip-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.chart-tooltip-name {
+  color: #cbd5f5;
+  flex: 1;
+}
+
+.chart-tooltip-value {
+  font-weight: 600;
+  color: #e2e8f0;
 }
