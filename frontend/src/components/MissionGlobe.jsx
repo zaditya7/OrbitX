@@ -111,6 +111,77 @@ const createDigitalContinents = (scene) => {
   scene.userData.continents = continents;
 };
 
+// ---------- Atmosphere: Fresnel rim-glow shader (bright at the limb, transparent center) ----------
+const atmosphereVertexShader = `
+  varying vec3 vNormal;
+  void main() {
+    vNormal = normalize(normalMatrix * normal);
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  }
+`;
+
+const atmosphereFragmentShader = `
+  uniform vec3 glowColor;
+  uniform float intensityPower;
+  uniform float glowOpacity;
+  varying vec3 vNormal;
+  void main() {
+    float intensity = pow(0.6 - dot(vNormal, vec3(0.0, 0.0, 1.0)), intensityPower);
+    gl_FragColor = vec4(glowColor, clamp(intensity, 0.0, 1.0) * glowOpacity);
+  }
+`;
+
+function createAtmosphereLayer({ radius, color, power, opacity, segments = 64 }) {
+  const geometry = new THREE.SphereGeometry(radius, segments, segments);
+  const material = new THREE.ShaderMaterial({
+    vertexShader: atmosphereVertexShader,
+    fragmentShader: atmosphereFragmentShader,
+    uniforms: {
+      glowColor: { value: new THREE.Color(color) },
+      intensityPower: { value: power },
+      glowOpacity: { value: opacity }
+    },
+    blending: THREE.AdditiveBlending,
+    transparent: true,
+    side: THREE.BackSide,
+    depthWrite: false
+  });
+  return new THREE.Mesh(geometry, material);
+}
+
+// ---------- Satellite marker glow + ring textures (generated once, shared by all markers) ----------
+function createGlowTexture() {
+  const canvas = document.createElement("canvas");
+  canvas.width = 128;
+  canvas.height = 128;
+  const ctx = canvas.getContext("2d");
+  const gradient = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
+  gradient.addColorStop(0, "rgba(255,255,255,1)");
+  gradient.addColorStop(0.35, "rgba(255,255,255,0.55)");
+  gradient.addColorStop(1, "rgba(255,255,255,0)");
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, 128, 128);
+  return new THREE.CanvasTexture(canvas);
+}
+
+function createRingTexture() {
+  const canvas = document.createElement("canvas");
+  canvas.width = 128;
+  canvas.height = 128;
+  const ctx = canvas.getContext("2d");
+  ctx.shadowColor = "rgba(255,255,255,0.9)";
+  ctx.shadowBlur = 14;
+  ctx.strokeStyle = "rgba(255,255,255,1)";
+  ctx.lineWidth = 6;
+  ctx.beginPath();
+  ctx.arc(64, 64, 48, 0, Math.PI * 2);
+  ctx.stroke();
+  return new THREE.CanvasTexture(canvas);
+}
+
+const GLOW_TEXTURE = typeof document !== "undefined" ? createGlowTexture() : null;
+const RING_TEXTURE = typeof document !== "undefined" ? createRingTexture() : null;
+
 const ORBIT_COLORS = ["#4ade80", "#38bdf8", "#f472b6", "#facc15", "#a78bfa"];
 
 function buildOrbitParams(satellites) {
@@ -124,24 +195,29 @@ function buildOrbitParams(satellites) {
   }));
 }
 
+const DEFAULT_ZOOM = 5.6;
+
 function MissionGlobe({ satellites = [], selectedName, onSelect }) {
   const mountRef = useRef(null);
   const labelRefs = useRef({});
   const rotationEnabledRef = useRef(true);
-  const zoomRef = useRef(3.9);
+  const zoomRef = useRef(DEFAULT_ZOOM);
   const satellitesRef = useRef(satellites);
   const onSelectRef = useRef(onSelect);
+  const selectedNameRef = useRef(selectedName);
 
   const [viewMode, setViewMode] = useState("3d");
-  const [zoomLevel, setZoomLevel] = useState(3.9);
+  const [zoomLevel, setZoomLevel] = useState(DEFAULT_ZOOM);
 
   useEffect(() => { zoomRef.current = zoomLevel; }, [zoomLevel]);
   useEffect(() => { rotationEnabledRef.current = viewMode === "3d"; }, [viewMode]);
   useEffect(() => { satellitesRef.current = satellites; }, [satellites]);
   useEffect(() => { onSelectRef.current = onSelect; }, [onSelect]);
+  useEffect(() => { selectedNameRef.current = selectedName; }, [selectedName]);
 
   // Only rebuild the 3D scene when satellites are added/removed — not when
-  // telemetry values on existing satellites tick every couple seconds.
+  // telemetry values on existing satellites tick every couple seconds, and
+  // not when the selection changes (that's handled via selectedNameRef).
   const satelliteKey = satellites.map((s) => s.name).join("|");
 
   useEffect(() => {
@@ -210,19 +286,23 @@ function MissionGlobe({ satellites = [], selectedName, onSelect }) {
     }
     scene.add(gridGroup);
 
-    const glowMaterial = new THREE.MeshBasicMaterial({ color: "#008cff", transparent: true, opacity: 0.14, side: THREE.BackSide });
-    const glow = new THREE.Mesh(new THREE.SphereGeometry(1.6, 64, 64), glowMaterial);
-    scene.add(glow);
+    // Layered atmosphere: tight bright rim + wider soft cyan halo
+    const innerAtmosphere = createAtmosphereLayer({ radius: 1.5, color: "#38bdf8", power: 2.2, opacity: 0.9 });
+    const outerAtmosphere = createAtmosphereLayer({ radius: 1.85, color: "#22d3ee", power: 3.4, opacity: 0.5 });
+    scene.add(innerAtmosphere);
+    scene.add(outerAtmosphere);
 
     const light = new THREE.PointLight("#008cff", 2.4, 10);
     light.position.set(3.5, 2.2, 4);
     scene.add(light);
     scene.add(new THREE.AmbientLight("#1e3a5f", 1.3));
 
-    // satellites: orbit rings + moving markers, built from the current list
+    // --- satellites: orbit rings + moving markers with glow + pulse rings ---
     const currentSatellites = satellitesRef.current;
     const orbitParams = buildOrbitParams(currentSatellites);
     const markerMeshes = [];
+    const haloSprites = [];
+    const ringSpriteGroups = [];
     const orbitsGroup = new THREE.Group();
 
     orbitParams.forEach(({ name, radius, inclination, color }) => {
@@ -233,13 +313,14 @@ function MissionGlobe({ satellites = [], selectedName, onSelect }) {
         vec.applyAxisAngle(new THREE.Vector3(1, 0, 0), inclination);
         ringPoints.push(vec);
       }
-      const ringLine = new THREE.LineLoop(
+      const orbitLine = new THREE.LineLoop(
         new THREE.BufferGeometry().setFromPoints(ringPoints),
         new THREE.LineDashedMaterial({ color, dashSize: 0.05, gapSize: 0.05, transparent: true, opacity: 0.75 })
       );
-      ringLine.computeLineDistances();
-      orbitsGroup.add(ringLine);
+      orbitLine.computeLineDistances();
+      orbitsGroup.add(orbitLine);
 
+      // Core marker — the actual click target
       const marker = new THREE.Mesh(
         new THREE.SphereGeometry(0.04, 16, 16),
         new THREE.MeshBasicMaterial({ color })
@@ -247,9 +328,42 @@ function MissionGlobe({ satellites = [], selectedName, onSelect }) {
       marker.userData = { name, radius, inclination };
       orbitsGroup.add(marker);
       markerMeshes.push(marker);
+
+      // Soft glow halo behind the marker
+      const haloSprite = new THREE.Sprite(new THREE.SpriteMaterial({
+        map: GLOW_TEXTURE,
+        color,
+        transparent: true,
+        opacity: 0.4,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending
+      }));
+      haloSprite.userData = { name };
+      haloSprite.scale.set(0.13, 0.13, 1);
+      orbitsGroup.add(haloSprite);
+      haloSprites.push(haloSprite);
+
+      // Pulsing rings — 1 always-on subtle ring, 2 more that only appear when selected
+      const rings = [0, 1, 2].map(() => {
+        const ringSprite = new THREE.Sprite(new THREE.SpriteMaterial({
+          map: RING_TEXTURE,
+          color,
+          transparent: true,
+          opacity: 0,
+          depthWrite: false,
+          blending: THREE.AdditiveBlending
+        }));
+        orbitsGroup.add(ringSprite);
+        return ringSprite;
+      });
+      ringSpriteGroups.push(rings);
     });
 
     scene.add(orbitsGroup);
+
+    // Raycast against both the core dot and its halo, so clicking near a
+    // satellite (not just the tiny 0.04-radius sphere) selects it.
+    const raycastTargets = [...markerMeshes, ...haloSprites];
 
     const raycaster = new THREE.Raycaster();
     const pointer = new THREE.Vector2();
@@ -259,7 +373,7 @@ function MissionGlobe({ satellites = [], selectedName, onSelect }) {
       pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
       pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
       raycaster.setFromCamera(pointer, camera);
-      const hits = raycaster.intersectObjects(markerMeshes);
+      const hits = raycaster.intersectObjects(raycastTargets);
       if (hits.length > 0 && onSelectRef.current) {
         const hitName = hits[0].object.userData.name;
         const sat = satellitesRef.current.find((s) => s.name === hitName);
@@ -278,19 +392,43 @@ function MissionGlobe({ satellites = [], selectedName, onSelect }) {
       if (rotationEnabledRef.current) {
         earth.rotation.y += 0.0015;
         gridGroup.rotation.y += 0.0015;
-        glow.rotation.y += 0.001;
         if (scene.userData.continents) {
           scene.userData.continents.rotation.y += 0.0015;
         }
       }
 
       markerMeshes.forEach((marker, i) => {
-        const { radius, inclination } = marker.userData;
+        const { radius, inclination, name } = marker.userData;
         const { speedFactor, phase } = orbitParams[i];
         const angle = elapsed * speedFactor + THREE.MathUtils.degToRad(phase);
         const vec = new THREE.Vector3(radius * Math.cos(angle), 0, radius * Math.sin(angle));
         vec.applyAxisAngle(new THREE.Vector3(1, 0, 0), inclination);
         marker.position.copy(vec);
+
+        const isSelected = name === selectedNameRef.current;
+        marker.scale.setScalar(isSelected ? 1.7 : 1);
+
+        const halo = haloSprites[i];
+        halo.position.copy(vec);
+        const haloScale = isSelected ? 0.22 : 0.13;
+        halo.scale.set(haloScale, haloScale, 1);
+        halo.material.opacity = isSelected ? 0.75 : 0.4;
+
+        const rings = ringSpriteGroups[i];
+        const activeRingCount = isSelected ? 3 : 1;
+        rings.forEach((ringSprite, ringIdx) => {
+          ringSprite.position.copy(vec);
+          if (ringIdx >= activeRingCount) {
+            ringSprite.material.opacity = 0;
+            return;
+          }
+          const period = 1.5 + ringIdx * 0.5;
+          const t = ((elapsed + ringIdx * 0.5 + i * 0.3) % period) / period;
+          const maxScale = isSelected ? 0.32 : 0.16;
+          const scale = THREE.MathUtils.lerp(0.05, maxScale, t);
+          ringSprite.scale.set(scale, scale, 1);
+          ringSprite.material.opacity = (1 - t) * (isSelected ? 0.8 : 0.35);
+        });
       });
 
       camera.position.z = zoomRef.current;
@@ -339,9 +477,9 @@ function MissionGlobe({ satellites = [], selectedName, onSelect }) {
   }, [satelliteKey]);
 
   const zoomIn = () => setZoomLevel((z) => Math.max(2.6, z - 0.4));
-  const zoomOut = () => setZoomLevel((z) => Math.min(6.5, z + 0.4));
+  const zoomOut = () => setZoomLevel((z) => Math.min(8, z + 0.4));
   const resetView = () => {
-    setZoomLevel(3.9);
+    setZoomLevel(DEFAULT_ZOOM);
     setViewMode("3d");
   };
 
