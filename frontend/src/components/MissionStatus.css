@@ -80,3 +80,8 @@
   border-color: #facc15;
   color: #facc15;
 }
+.mission-status-hint {
+  margin-top: 14px;
+  font-size: 11px;
+  color: #64748b;
+}

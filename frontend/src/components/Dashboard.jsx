@@ -15,6 +15,12 @@ function Dashboard({ satellites, setSatellites }) {
         );
     };
 
+    const changeAllStatus = (status) => {
+        setSatellites((prevSatellites) =>
+            prevSatellites.map((satellite) => ({ ...satellite, status }))
+        );
+    };
+
     const activeCount = satellites.filter((s) => s.status === "active").length;
     const criticalCount = satellites.filter((s) => s.status === "offline").length;
     const avgSignal = satellites.length
@@ -38,7 +44,7 @@ function Dashboard({ satellites, setSatellites }) {
             </div>
 
             <section className="dashboard-section">
-                <MissionStatus />
+                <MissionStatus satellites={satellites} onBulkStatusChange={changeAllStatus} />
             </section>
 
             <section className="dashboard-section">
