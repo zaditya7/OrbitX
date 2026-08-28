@@ -1,7 +1,13 @@
+import { useState } from "react";
 import "./SatelliteDetailPanel.css";
 import { orbitalSpeed, orbitalPeriodMinutes } from "../utils/orbital";
 import { getOrbitalProfile } from "../utils/satelliteProfile";
-import { getCommunicationStatus } from "../utils/alerts";
+import {
+  getCommunicationStatus,
+  getBatteryLevel,
+  getSignalLevel,
+  getTemperatureLevel
+} from "../utils/alerts";
 
 const statusStyles = {
   active: { label: "Active", color: "#4ade80" },
@@ -15,6 +21,30 @@ const COMM_COLORS = {
   Lost: "#f87171"
 };
 
+const LEVEL_NOTES = {
+  signal: {
+    normal: "Signal strong and stable.",
+    warning: "Signal degrading.",
+    critical: "Signal critically weak or lost."
+  },
+  power: {
+    normal: "Battery nominal.",
+    warning: "Battery low — consider prioritizing charge.",
+    critical: "Battery critical — immediate action recommended."
+  },
+  environment: {
+    normal: "Temperature within nominal range.",
+    warning: "Temperature approaching operational limits.",
+    critical: "Temperature outside safe operating range."
+  }
+};
+
+const EXPLORE_TABS = [
+  { id: "signal", label: "📡 Signal" },
+  { id: "power", label: "🔋 Power" },
+  { id: "environment", label: "🌡 Environment" }
+];
+
 function TelemetryBar({ icon, label, value, unit, color }) {
   const pct = Math.max(0, Math.min(100, value));
   return (
@@ -22,10 +52,7 @@ function TelemetryBar({ icon, label, value, unit, color }) {
       <span className="telemetry-icon">{icon}</span>
       <span className="telemetry-label">{label}</span>
       <div className="telemetry-track">
-        <div
-          className="telemetry-fill"
-          style={{ width: `${pct}%`, background: color }}
-        />
+        <div className="telemetry-fill" style={{ width: `${pct}%`, background: color }} />
       </div>
       <span className="telemetry-value">
         {value.toFixed(1)}
@@ -36,6 +63,8 @@ function TelemetryBar({ icon, label, value, unit, color }) {
 }
 
 function SatelliteDetailPanel({ satellite }) {
+  const [exploreTab, setExploreTab] = useState("signal");
+
   if (!satellite) {
     return (
       <div className="satellite-detail-panel empty">
@@ -52,6 +81,10 @@ function SatelliteDetailPanel({ satellite }) {
   const commStatus = getCommunicationStatus(satellite.signal || 0);
   const commColor = COMM_COLORS[commStatus];
   const lastUpdated = satellite.lastUpdated ? new Date(satellite.lastUpdated) : new Date();
+
+  const signalLevel = getSignalLevel(satellite.signal ?? 0);
+  const batteryLevel = getBatteryLevel(satellite.battery ?? 0);
+  const temperatureLevel = getTemperatureLevel(satellite.temperature ?? 0);
 
   return (
     <div className="satellite-detail-panel">
@@ -106,35 +139,43 @@ function SatelliteDetailPanel({ satellite }) {
       </div>
 
       <h3 className="telemetry-heading">Live Telemetry</h3>
-      <TelemetryBar
-        icon="🔋"
-        label="Battery"
-        value={satellite.battery || 0}
-        unit="%"
-        color="#4ade80"
-      />
-      <TelemetryBar
-        icon="📡"
-        label="Signal"
-        value={satellite.signal || 0}
-        unit="%"
-        color="#38bdf8"
-      />
-      <TelemetryBar
-        icon="🌡"
-        label="Temperature"
-        value={satellite.temperature || 0}
-        unit="°C"
-        color="#f87171"
-      />
+      <TelemetryBar icon="🔋" label="Battery" value={satellite.battery || 0} unit="%" color="#4ade80" />
+      <TelemetryBar icon="📡" label="Signal" value={satellite.signal || 0} unit="%" color="#38bdf8" />
+      <TelemetryBar icon="🌡" label="Temperature" value={satellite.temperature || 0} unit="°C" color="#f87171" />
 
-      <div className="comm-status-row">
-        <span
-          className="comm-dot"
-          style={{ background: commColor, boxShadow: `0 0 8px ${commColor}` }}
-        />
-        <span>Communication</span>
-        <strong style={{ color: commColor }}>{commStatus}</strong>
+      <h3 className="telemetry-heading">Explore</h3>
+      <div className="detail-tabs">
+        {EXPLORE_TABS.map((tab) => (
+          <button
+            key={tab.id}
+            className={`detail-tab-btn ${exploreTab === tab.id ? "active" : ""}`}
+            onClick={() => setExploreTab(tab.id)}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      <div className="detail-tab-content">
+        {exploreTab === "signal" && (
+          <>
+            <div className="comm-status-row">
+              <span
+                className="comm-dot"
+                style={{ background: commColor, boxShadow: `0 0 8px ${commColor}` }}
+              />
+              <span>Communication</span>
+              <strong style={{ color: commColor }}>{commStatus}</strong>
+            </div>
+            <p className="tab-note">{LEVEL_NOTES.signal[signalLevel]}</p>
+          </>
+        )}
+        {exploreTab === "power" && (
+          <p className="tab-note">{LEVEL_NOTES.power[batteryLevel]}</p>
+        )}
+        {exploreTab === "environment" && (
+          <p className="tab-note">{LEVEL_NOTES.environment[temperatureLevel]}</p>
+        )}
       </div>
 
       <div className="last-telemetry">

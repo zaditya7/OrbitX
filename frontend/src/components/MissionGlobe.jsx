@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { orbitalSpeed } from "../utils/orbital";
-import "./MissionGlobe.css";
 import { getOrbitalProfile } from "../utils/satelliteProfile";
+import { ORBIT_COLORS } from "../utils/orbitColors";
+import "./MissionGlobe.css";
 
 // ---------- Earth base texture: ocean glow + faint grid, no baked continents ----------
 const createEarthTexture = () => {
@@ -183,8 +184,6 @@ function createRingTexture() {
 const GLOW_TEXTURE = typeof document !== "undefined" ? createGlowTexture() : null;
 const RING_TEXTURE = typeof document !== "undefined" ? createRingTexture() : null;
 
-const ORBIT_COLORS = ["#4ade80", "#38bdf8", "#f472b6", "#facc15", "#a78bfa"];
-
 function buildOrbitParams(satellites) {
   return satellites.map((sat, index) => {
     const profile = getOrbitalProfile(sat.name);
@@ -220,8 +219,7 @@ function MissionGlobe({ satellites = [], selectedName, onSelect }) {
   useEffect(() => { selectedNameRef.current = selectedName; }, [selectedName]);
 
   // Only rebuild the 3D scene when satellites are added/removed — not when
-  // telemetry values on existing satellites tick every couple seconds, and
-  // not when the selection changes (that's handled via selectedNameRef).
+  // telemetry values tick, and not on selection change (handled live below).
   const satelliteKey = satellites.map((s) => s.name).join("|");
 
   useEffect(() => {
@@ -290,7 +288,6 @@ function MissionGlobe({ satellites = [], selectedName, onSelect }) {
     }
     scene.add(gridGroup);
 
-    // Layered atmosphere: tight bright rim + wider soft cyan halo
     const innerAtmosphere = createAtmosphereLayer({ radius: 1.5, color: "#38bdf8", power: 2.2, opacity: 0.9 });
     const outerAtmosphere = createAtmosphereLayer({ radius: 1.85, color: "#22d3ee", power: 3.4, opacity: 0.5 });
     scene.add(innerAtmosphere);
@@ -307,6 +304,7 @@ function MissionGlobe({ satellites = [], selectedName, onSelect }) {
     const markerMeshes = [];
     const haloSprites = [];
     const ringSpriteGroups = [];
+    const orbitLines = [];
     const orbitsGroup = new THREE.Group();
 
     orbitParams.forEach(({ name, radius, inclination, color }) => {
@@ -319,12 +317,12 @@ function MissionGlobe({ satellites = [], selectedName, onSelect }) {
       }
       const orbitLine = new THREE.LineLoop(
         new THREE.BufferGeometry().setFromPoints(ringPoints),
-        new THREE.LineDashedMaterial({ color, dashSize: 0.05, gapSize: 0.05, transparent: true, opacity: 0.75 })
+        new THREE.LineDashedMaterial({ color, dashSize: 0.05, gapSize: 0.05, transparent: true, opacity: 0.4 })
       );
       orbitLine.computeLineDistances();
       orbitsGroup.add(orbitLine);
+      orbitLines.push(orbitLine);
 
-      // Core marker — the actual click target
       const marker = new THREE.Mesh(
         new THREE.SphereGeometry(0.04, 16, 16),
         new THREE.MeshBasicMaterial({ color })
@@ -333,7 +331,6 @@ function MissionGlobe({ satellites = [], selectedName, onSelect }) {
       orbitsGroup.add(marker);
       markerMeshes.push(marker);
 
-      // Soft glow halo behind the marker
       const haloSprite = new THREE.Sprite(new THREE.SpriteMaterial({
         map: GLOW_TEXTURE,
         color,
@@ -347,7 +344,6 @@ function MissionGlobe({ satellites = [], selectedName, onSelect }) {
       orbitsGroup.add(haloSprite);
       haloSprites.push(haloSprite);
 
-      // Pulsing rings — 1 always-on subtle ring, 2 more that only appear when selected
       const rings = [0, 1, 2].map(() => {
         const ringSprite = new THREE.Sprite(new THREE.SpriteMaterial({
           map: RING_TEXTURE,
@@ -365,10 +361,7 @@ function MissionGlobe({ satellites = [], selectedName, onSelect }) {
 
     scene.add(orbitsGroup);
 
-    // Raycast against both the core dot and its halo, so clicking near a
-    // satellite (not just the tiny 0.04-radius sphere) selects it.
     const raycastTargets = [...markerMeshes, ...haloSprites];
-
     const raycaster = new THREE.Raycaster();
     const pointer = new THREE.Vector2();
 
@@ -388,6 +381,14 @@ function MissionGlobe({ satellites = [], selectedName, onSelect }) {
 
     let animationId;
     let elapsed = 0;
+
+    // --- camera "focus" state: one-shot ease toward whichever satellite was
+    // just selected, then hold — not a continuous chase (see message above) ---
+    let lastFocusedName = null;
+    let cameraAzimuth = 0;
+    let cameraElevation = 0;
+    let targetAzimuth = 0;
+    let targetElevation = 0;
 
     const animate = () => {
       animationId = requestAnimationFrame(animate);
@@ -418,6 +419,8 @@ function MissionGlobe({ satellites = [], selectedName, onSelect }) {
         halo.scale.set(haloScale, haloScale, 1);
         halo.material.opacity = isSelected ? 0.75 : 0.4;
 
+        orbitLines[i].material.opacity = isSelected ? 0.95 : 0.4;
+
         const rings = ringSpriteGroups[i];
         const activeRingCount = isSelected ? 3 : 1;
         rings.forEach((ringSprite, ringIdx) => {
@@ -435,7 +438,30 @@ function MissionGlobe({ satellites = [], selectedName, onSelect }) {
         });
       });
 
-      camera.position.z = zoomRef.current;
+      // Capture a new focus target only when the selection actually changes.
+      const currentSelected = selectedNameRef.current;
+      if (currentSelected !== lastFocusedName) {
+        lastFocusedName = currentSelected;
+        const marker = markerMeshes.find((m) => m.userData.name === currentSelected);
+        if (marker) {
+          targetAzimuth = Math.atan2(marker.position.x, marker.position.z);
+          targetElevation = 0.18;
+        }
+      }
+
+      let delta = targetAzimuth - cameraAzimuth;
+      delta = Math.atan2(Math.sin(delta), Math.cos(delta)); // shortest angular path
+      cameraAzimuth += delta * 0.04;
+      cameraElevation += (targetElevation - cameraElevation) * 0.04;
+
+      const radius = zoomRef.current;
+      camera.position.set(
+        radius * Math.sin(cameraAzimuth) * Math.cos(cameraElevation),
+        radius * Math.sin(cameraElevation),
+        radius * Math.cos(cameraAzimuth) * Math.cos(cameraElevation)
+      );
+      camera.lookAt(0, 0, 0);
+
       renderer.render(scene, camera);
 
       markerMeshes.forEach((marker) => {
