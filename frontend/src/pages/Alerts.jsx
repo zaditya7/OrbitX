@@ -1,43 +1,11 @@
 import "./Alerts.css";
+import { generateAlerts } from "../utils/alerts";
 
 const TYPE_ICON = {
   battery: "🔋",
   temperature: "🌡",
   signal: "📶"
 };
-
-function generateAlerts(satellite) {
-  const alerts = [];
-
-  if (satellite.battery < 30) {
-    alerts.push({
-      type: "battery",
-      satellite: satellite.name,
-      message: "Low battery",
-      level: "critical"
-    });
-  }
-
-  if (satellite.temperature > 50 || satellite.temperature < -20) {
-    alerts.push({
-      type: "temperature",
-      satellite: satellite.name,
-      message: "Temperature critical",
-      level: "critical"
-    });
-  }
-
-  if (satellite.signal < 30) {
-    alerts.push({
-      type: "signal",
-      satellite: satellite.name,
-      message: "Weak signal",
-      level: "warning"
-    });
-  }
-
-  return alerts;
-}
 
 function Alerts({ satellites }) {
   const alerts = satellites.flatMap((s) => generateAlerts(s));

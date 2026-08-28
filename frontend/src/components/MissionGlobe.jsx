@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { orbitalSpeed } from "../utils/orbital";
 import "./MissionGlobe.css";
+import { getOrbitalProfile } from "../utils/satelliteProfile";
 
 // ---------- Earth base texture: ocean glow + faint grid, no baked continents ----------
 const createEarthTexture = () => {
@@ -185,14 +186,17 @@ const RING_TEXTURE = typeof document !== "undefined" ? createRingTexture() : nul
 const ORBIT_COLORS = ["#4ade80", "#38bdf8", "#f472b6", "#facc15", "#a78bfa"];
 
 function buildOrbitParams(satellites) {
-  return satellites.map((sat, index) => ({
-    name: sat.name,
-    radius: 1.7 + index * 0.22,
-    inclination: THREE.MathUtils.degToRad(20 + ((index * 45) % 150)),
-    phase: (index * 97) % 360,
-    color: ORBIT_COLORS[index % ORBIT_COLORS.length],
-    speedFactor: 0.15 + (index % 3) * 0.05
-  }));
+  return satellites.map((sat, index) => {
+    const profile = getOrbitalProfile(sat.name);
+    return {
+      name: sat.name,
+      radius: 1.7 + index * 0.22,
+      inclination: THREE.MathUtils.degToRad(profile.inclinationDeg),
+      phase: (index * 97) % 360,
+      color: ORBIT_COLORS[index % ORBIT_COLORS.length],
+      speedFactor: 0.15 + (index % 3) * 0.05
+    };
+  });
 }
 
 const DEFAULT_ZOOM = 5.6;

@@ -1,10 +1,18 @@
 import "./SatelliteDetailPanel.css";
-import { orbitalSpeed } from "../utils/orbital";
+import { orbitalSpeed, orbitalPeriodMinutes } from "../utils/orbital";
+import { getOrbitalProfile } from "../utils/satelliteProfile";
+import { getCommunicationStatus } from "../utils/alerts";
 
 const statusStyles = {
   active: { label: "Active", color: "#4ade80" },
   offline: { label: "Offline", color: "#ff4d4d" },
   maintenance: { label: "Maintenance", color: "#facc15" }
+};
+
+const COMM_COLORS = {
+  Connected: "#4ade80",
+  Intermittent: "#facc15",
+  Lost: "#f87171"
 };
 
 function TelemetryBar({ icon, label, value, unit, color }) {
@@ -37,7 +45,13 @@ function SatelliteDetailPanel({ satellite }) {
   }
 
   const status = statusStyles[satellite.status] || statusStyles.active;
-  const speed = orbitalSpeed(satellite.altitude || 0);
+  const profile = getOrbitalProfile(satellite.name);
+  const altitude = satellite.altitude ?? profile.altitudeKm;
+  const speed = orbitalSpeed(altitude);
+  const periodMinutes = orbitalPeriodMinutes(altitude);
+  const commStatus = getCommunicationStatus(satellite.signal || 0);
+  const commColor = COMM_COLORS[commStatus];
+  const lastUpdated = satellite.lastUpdated ? new Date(satellite.lastUpdated) : new Date();
 
   return (
     <div className="satellite-detail-panel">
@@ -56,6 +70,8 @@ function SatelliteDetailPanel({ satellite }) {
         <h2>{satellite.name}</h2>
       </div>
 
+      {!profile.isReal && <div className="simulated-badge">Simulated Spacecraft</div>}
+
       <div className="satellite-illustration">🛰️</div>
 
       <div className="info-list">
@@ -67,17 +83,25 @@ function SatelliteDetailPanel({ satellite }) {
           <span>Launch Date</span>
           <strong>{satellite.launchDate || "Unknown"}</strong>
         </div>
+      </div>
+
+      <h3 className="telemetry-heading">Orbit</h3>
+      <div className="info-list">
         <div className="info-row">
-          <span>Altitude</span>
-          <strong>{satellite.altitude?.toFixed(1)} km</strong>
+          <span>Orbital Altitude</span>
+          <strong>{altitude.toFixed(1)} km</strong>
         </div>
         <div className="info-row">
-          <span>Speed</span>
+          <span>Orbital Speed</span>
           <strong>{speed.toFixed(2)} km/s</strong>
         </div>
         <div className="info-row">
-          <span>Status</span>
-          <strong style={{ color: status.color }}>{status.label}</strong>
+          <span>Inclination</span>
+          <strong>{profile.inclinationDeg.toFixed(1)}°</strong>
+        </div>
+        <div className="info-row">
+          <span>Orbital Period</span>
+          <strong>{periodMinutes.toFixed(1)} min</strong>
         </div>
       </div>
 
@@ -90,8 +114,8 @@ function SatelliteDetailPanel({ satellite }) {
         color="#4ade80"
       />
       <TelemetryBar
-        icon="📶"
-        label="Signal Strength"
+        icon="📡"
+        label="Signal"
         value={satellite.signal || 0}
         unit="%"
         color="#38bdf8"
@@ -101,8 +125,25 @@ function SatelliteDetailPanel({ satellite }) {
         label="Temperature"
         value={satellite.temperature || 0}
         unit="°C"
-        color="#ff4d4d"
+        color="#f87171"
       />
+
+      <div className="comm-status-row">
+        <span
+          className="comm-dot"
+          style={{ background: commColor, boxShadow: `0 0 8px ${commColor}` }}
+        />
+        <span>Communication</span>
+        <strong style={{ color: commColor }}>{commStatus}</strong>
+      </div>
+
+      <div className="last-telemetry">
+        <div className="last-telemetry-title">Last Telemetry</div>
+        <div className="last-telemetry-time">{lastUpdated.toLocaleTimeString()}</div>
+        <div className="last-telemetry-row">Signal: {satellite.signal?.toFixed(1)}%</div>
+        <div className="last-telemetry-row">Battery: {satellite.battery?.toFixed(1)}%</div>
+        <div className="last-telemetry-row">Temperature: {satellite.temperature?.toFixed(1)}°C</div>
+      </div>
     </div>
   );
 }

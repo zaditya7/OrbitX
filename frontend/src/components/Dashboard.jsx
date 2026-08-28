@@ -3,7 +3,7 @@ import "./Dashboard.css";
 import MissionStatus from "./MissionStatus";
 import SatelliteList from "./SatelliteList";
 
-function Dashboard({ satellites, setSatellites }) {
+function Dashboard({ satellites, setSatellites, missions = [] }) {
     const changeStatus = (name, status) => {
         setSatellites((prevSatellites) =>
             prevSatellites.map((satellite) => {
@@ -21,8 +21,12 @@ function Dashboard({ satellites, setSatellites }) {
         );
     };
 
-    const activeCount = satellites.filter((s) => s.status === "active").length;
-    const criticalCount = satellites.filter((s) => s.status === "offline").length;
+    const activeSatelliteCount = satellites.filter((s) => s.status === "active").length;
+    const activeMissionCount = missions.filter((m) => m.status === "active").length;
+    const criticalAlertCount = satellites.reduce(
+        (total, s) => total + (s.alerts?.filter((a) => a.level === "critical").length || 0),
+        0
+    );
     const avgSignal = satellites.length
         ? Math.round(
               satellites.reduce((sum, s) => sum + (s.signal || 0), 0) / satellites.length
@@ -38,9 +42,10 @@ function Dashboard({ satellites, setSatellites }) {
 
             <div className="cards">
                 <StatCard title="Total Satellites" value={satellites.length} icon="🛰️" accent="#38bdf8" />
-                <StatCard title="Active Missions" value={activeCount} icon="🚀" accent="#4ade80" />
-                <StatCard title="Critical Alerts" value={criticalCount} icon="⚠️" accent="#f87171" />
-                <StatCard title="Avg Signal Strength" value={`${avgSignal}%`} icon="📡" accent="#a78bfa" />
+                <StatCard title="Active Satellites" value={activeSatelliteCount} icon="📡" accent="#4ade80" />
+                <StatCard title="Active Missions" value={activeMissionCount} icon="🚀" accent="#a78bfa" />
+                <StatCard title="Critical Alerts" value={criticalAlertCount} icon="⚠️" accent="#f87171" />
+                <StatCard title="Avg Signal Strength" value={`${avgSignal}%`} icon="📶" accent="#facc15" />
             </div>
 
             <section className="dashboard-section">

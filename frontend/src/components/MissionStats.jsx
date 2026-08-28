@@ -32,9 +32,10 @@ function LiveClock() {
   );
 }
 
-function MissionStats({ satellites }) {
+function MissionStats({ satellites, missions = [] }) {
   const total = satellites.length;
   const active = satellites.filter((s) => s.status === "active").length;
+  const activeMissions = missions.filter((m) => m.status === "active").length;
 
   return (
     <div className="mission-stats">
@@ -58,7 +59,7 @@ function MissionStats({ satellites }) {
         <span className="dot missions" />
         <div>
           <div className="stat-label">Active Missions</div>
-          <div className="stat-value">{active}</div>
+          <div className="stat-value">{activeMissions}</div>
         </div>
       </div>
 

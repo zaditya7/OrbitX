@@ -1,6 +1,7 @@
 import "./SatelliteList.css";
 import SatelliteCard from "./SatelliteCard";
 import { useState, useEffect, useRef } from "react";
+import { getOrbitalProfile } from "../utils/satelliteProfile";
 
 function SatelliteList({ satellites, setSatellites, changeStatus }) {
   const [name, setName] = useState("");
@@ -9,20 +10,6 @@ function SatelliteList({ satellites, setSatellites, changeStatus }) {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortOrder, setSortOrder] = useState("none");
-
-  const generateAlerts = (satellite) => {
-    const alerts = [];
-    if (satellite.battery < 30) {
-      alerts.push({ type: "battery", message: `${satellite.name}: Low battery`, level: "critical" });
-    }
-    if (satellite.temperature > 50 || satellite.temperature < -20) {
-      alerts.push({ type: "temperature", message: `${satellite.name}: Temperature critical`, level: "critical" });
-    }
-    if (satellite.signal < 30) {
-      alerts.push({ type: "signal", message: `${satellite.name}: Weak signal`, level: "warning" });
-    }
-    return alerts;
-  };
 
   useEffect(() => {
     const savedSatellites = localStorage.getItem("satellites");
@@ -34,32 +21,6 @@ function SatelliteList({ satellites, setSatellites, changeStatus }) {
       }));
       setSatellites(fixedSatellites);
     }
-  }, []);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setSatellites((prev) =>
-        prev.map((sat) => {
-          let newBattery = sat.battery - Math.random() * 0.5;
-          if (newBattery <= 0) newBattery = 100;
-          const newTemp = Math.max(-20, Math.min(50, sat.temperature + (Math.random() * 2 - 1)));
-          let newSignal = sat.signal + (Math.random() * 4 - 2);
-          newSignal = Math.max(20, Math.min(100, newSignal));
-          let newAltitude = sat.altitude + (Math.random() * 2 - 1);
-          if (newAltitude < 0) newAltitude = 0;
-
-          const updated = { ...sat, battery: newBattery, temperature: newTemp, signal: newSignal, altitude: newAltitude };
-          const alerts = generateAlerts(updated);
-          const newHistory = {
-            battery: [...(sat.history?.battery || []), newBattery].slice(-20),
-            temperature: [...(sat.history?.temperature || []), newTemp].slice(-20),
-            signal: [...(sat.history?.signal || []), newSignal].slice(-20)
-          };
-          return { ...updated, alerts, history: newHistory };
-        })
-      );
-    }, 1000);
-    return () => clearInterval(interval);
   }, []);
 
   const isInitialMount = useRef(true);
@@ -75,14 +36,18 @@ function SatelliteList({ satellites, setSatellites, changeStatus }) {
     if (name === "" || country === "") return;
 
     if (editingSatellite === null) {
+      // Seed new satellites with a physically plausible LEO altitude instead
+      // of a totally arbitrary one — see utils/satelliteProfile.js.
+      const profile = getOrbitalProfile(name);
       const newSatellite = {
         name,
         status: "active",
         country,
-        battery: Math.floor(Math.random() * 50) + 50,
-        temperature: Math.floor(Math.random() * 20) + 10,
-        signal: Math.floor(Math.random() * 40) + 60,
-        altitude: Math.floor(Math.random() * 200) + 400,
+        battery: 60 + Math.random() * 30,
+        temperature: 5 + Math.random() * 10,
+        signal: 50 + Math.random() * 30,
+        altitude: profile.altitudeKm,
+        lastUpdated: Date.now(),
         history: { battery: [], temperature: [], signal: [] }
       };
       setSatellites([...satellites, newSatellite]);
