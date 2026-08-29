@@ -2,6 +2,7 @@ import { useState } from "react";
 import "./SatelliteDetailPanel.css";
 import { orbitalSpeed, orbitalPeriodMinutes } from "../utils/orbital";
 import { getOrbitalProfile } from "../utils/satelliteProfile";
+import { formatMissionDuration } from "../utils/dateUtils";
 import {
   getCommunicationStatus,
   getBatteryLevel,
@@ -42,10 +43,24 @@ const LEVEL_NOTES = {
 const EXPLORE_TABS = [
   { id: "signal", label: "📡 Signal" },
   { id: "power", label: "🔋 Power" },
-  { id: "environment", label: "🌡 Environment" }
+  { id: "environment", label: "🌡 Environment" },
+  { id: "alerts", label: "🚨 Alerts" }
 ];
 
-function TelemetryBar({ icon, label, value, unit, color }) {
+// Compares the most recent reading against one from a few ticks back, so a
+// single noisy sample doesn't flip the arrow — needs a real, sustained move.
+function getTrend(history) {
+  if (!Array.isArray(history) || history.length < 4) return "flat";
+  const recent = history[history.length - 1];
+  const earlier = history[Math.max(0, history.length - 5)];
+  const diff = recent - earlier;
+  if (Math.abs(diff) < 0.3) return "flat";
+  return diff > 0 ? "up" : "down";
+}
+
+const TREND_ICON = { up: "▲", down: "▼", flat: "–" };
+
+function TelemetryBar({ icon, label, value, unit, color, trend }) {
   const pct = Math.max(0, Math.min(100, value));
   return (
     <div className="telemetry-row">
@@ -54,6 +69,7 @@ function TelemetryBar({ icon, label, value, unit, color }) {
       <div className="telemetry-track">
         <div className="telemetry-fill" style={{ width: `${pct}%`, background: color }} />
       </div>
+      <span className={`telemetry-trend trend-${trend}`}>{TREND_ICON[trend]}</span>
       <span className="telemetry-value">
         {value.toFixed(1)}
         {unit}
@@ -62,7 +78,13 @@ function TelemetryBar({ icon, label, value, unit, color }) {
   );
 }
 
-function SatelliteDetailPanel({ satellite }) {
+const STATUS_ACTIONS = [
+  { value: "active", label: "🟢 Active" },
+  { value: "offline", label: "🔴 Offline" },
+  { value: "maintenance", label: "🟡 Maintenance" }
+];
+
+function SatelliteDetailPanel({ satellite, onChangeStatus }) {
   const [exploreTab, setExploreTab] = useState("signal");
 
   if (!satellite) {
@@ -81,10 +103,17 @@ function SatelliteDetailPanel({ satellite }) {
   const commStatus = getCommunicationStatus(satellite.signal || 0);
   const commColor = COMM_COLORS[commStatus];
   const lastUpdated = satellite.lastUpdated ? new Date(satellite.lastUpdated) : new Date();
+  const missionDuration = formatMissionDuration(satellite.launchDate);
 
   const signalLevel = getSignalLevel(satellite.signal ?? 0);
   const batteryLevel = getBatteryLevel(satellite.battery ?? 0);
   const temperatureLevel = getTemperatureLevel(satellite.temperature ?? 0);
+
+  const batteryTrend = getTrend(satellite.history?.battery);
+  const signalTrend = getTrend(satellite.history?.signal);
+  const temperatureTrend = getTrend(satellite.history?.temperature);
+
+  const activeAlerts = satellite.alerts || [];
 
   return (
     <div className="satellite-detail-panel">
@@ -116,6 +145,18 @@ function SatelliteDetailPanel({ satellite }) {
           <span>Launch Date</span>
           <strong>{satellite.launchDate || "Unknown"}</strong>
         </div>
+        {missionDuration && (
+          <div className="info-row">
+            <span>Mission Duration</span>
+            <strong>{missionDuration}</strong>
+          </div>
+        )}
+        {profile.noradId && (
+          <div className="info-row">
+            <span>NORAD ID</span>
+            <strong>{profile.noradId}</strong>
+          </div>
+        )}
       </div>
 
       <h3 className="telemetry-heading">Orbit</h3>
@@ -139,9 +180,9 @@ function SatelliteDetailPanel({ satellite }) {
       </div>
 
       <h3 className="telemetry-heading">Live Telemetry</h3>
-      <TelemetryBar icon="🔋" label="Battery" value={satellite.battery || 0} unit="%" color="#4ade80" />
-      <TelemetryBar icon="📡" label="Signal" value={satellite.signal || 0} unit="%" color="#38bdf8" />
-      <TelemetryBar icon="🌡" label="Temperature" value={satellite.temperature || 0} unit="°C" color="#f87171" />
+      <TelemetryBar icon="🔋" label="Battery" value={satellite.battery || 0} unit="%" color="#4ade80" trend={batteryTrend} />
+      <TelemetryBar icon="📡" label="Signal" value={satellite.signal || 0} unit="%" color="#38bdf8" trend={signalTrend} />
+      <TelemetryBar icon="🌡" label="Temperature" value={satellite.temperature || 0} unit="°C" color="#f87171" trend={temperatureTrend} />
 
       <h3 className="telemetry-heading">Explore</h3>
       <div className="detail-tabs">
@@ -152,6 +193,9 @@ function SatelliteDetailPanel({ satellite }) {
             onClick={() => setExploreTab(tab.id)}
           >
             {tab.label}
+            {tab.id === "alerts" && activeAlerts.length > 0 && (
+              <span className="tab-badge">{activeAlerts.length}</span>
+            )}
           </button>
         ))}
       </div>
@@ -176,7 +220,38 @@ function SatelliteDetailPanel({ satellite }) {
         {exploreTab === "environment" && (
           <p className="tab-note">{LEVEL_NOTES.environment[temperatureLevel]}</p>
         )}
+        {exploreTab === "alerts" && (
+          activeAlerts.length === 0 ? (
+            <p className="tab-note">✅ No active alerts for {satellite.name}.</p>
+          ) : (
+            <div className="panel-alert-list">
+              {activeAlerts.map((alert, i) => (
+                <div key={i} className={`panel-alert-row ${alert.level}`}>
+                  <span>⚠</span>
+                  <span>{alert.message}</span>
+                </div>
+              ))}
+            </div>
+          )
+        )}
       </div>
+
+      {onChangeStatus && (
+        <>
+          <h3 className="telemetry-heading">Quick Actions</h3>
+          <div className="quick-action-row">
+            {STATUS_ACTIONS.map((action) => (
+              <button
+                key={action.value}
+                className={`quick-action-btn ${satellite.status === action.value ? "active" : ""}`}
+                onClick={() => onChangeStatus(satellite.name, action.value)}
+              >
+                {action.label}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
 
       <div className="last-telemetry">
         <div className="last-telemetry-title">Last Telemetry</div>

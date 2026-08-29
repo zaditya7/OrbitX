@@ -5,13 +5,22 @@ import SatelliteDetailPanel from "../components/SatelliteDetailPanel";
 import SatelliteComparePanel from "../components/SatelliteComparePanel";
 import "./Mission.css";
 
-function Mission({ satellites = [], missions = [] }) {
+function Mission({ satellites = [], missions = [], setSatellites, addEvent }) {
   const [selectedName, setSelectedName] = useState(satellites[0]?.name || null);
   const [compareMode, setCompareMode] = useState(false);
   const [compareA, setCompareA] = useState(satellites[0]?.name || null);
   const [compareB, setCompareB] = useState(satellites[1]?.name || satellites[0]?.name || null);
 
   const selectedSatellite = satellites.find((s) => s.name === selectedName) || null;
+
+  const handleChangeStatus = setSatellites
+    ? (name, status) => {
+        setSatellites((prev) =>
+          prev.map((sat) => (sat.name === name ? { ...sat, status } : sat))
+        );
+        if (addEvent) addEvent(`🔧 ${name} set to ${status}`, "info");
+      }
+    : null;
 
   return (
     <div>
@@ -29,7 +38,7 @@ function Mission({ satellites = [], missions = [] }) {
           selectedName={selectedName}
           onSelect={(sat) => setSelectedName(sat.name)}
         />
-        <SatelliteDetailPanel satellite={selectedSatellite} />
+        <SatelliteDetailPanel satellite={selectedSatellite} onChangeStatus={handleChangeStatus} />
       </div>
 
       <div className="compare-toggle-row">

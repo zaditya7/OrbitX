@@ -69,7 +69,11 @@ function AppLayout({ satellites, setSatellitesWithAlerts, missions, events, stre
             path="/mission"
             element={
               <ProtectedRoute>
-                <Mission satellites={satellites} missions={missions} />
+                <Mission 
+                  satellites={satellites} 
+                  missions={missions} 
+                  setSatellites={setSatellitesWithAlerts}
+                  addEvent={addEvent} />
               </ProtectedRoute>
             }
           />
@@ -80,6 +84,7 @@ function AppLayout({ satellites, setSatellitesWithAlerts, missions, events, stre
                 <Admin
                   satellites={satellites}
                   setSatellites={setSatellitesWithAlerts}
+                  addEvent={addEvent}
                 />
               </ProtectedRoute>
             }

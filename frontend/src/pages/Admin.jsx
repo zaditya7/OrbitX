@@ -14,13 +14,13 @@ function UserRow({ u, isSelf, onRoleChange, onDelete }) {
       <td>{new Date(u.created_at).toLocaleDateString()}</td>
       <td className="user-actions">
         {u.role === "user" ? (
-          <button onClick={() => onRoleChange(u.id, "admin")}>Make admin</button>
+          <button onClick={() => onRoleChange(u.id, u.username, "admin")}>Make admin</button>
         ) : (
-          <button onClick={() => onRoleChange(u.id, "user")} disabled={isSelf}>
+          <button onClick={() => onRoleChange(u.id, u.username, "user")} disabled={isSelf}>
             Remove admin
           </button>
         )}
-        <button className="danger" onClick={() => onDelete(u.id)} disabled={isSelf}>
+        <button className="danger" onClick={() => onDelete(u.id, u.username)} disabled={isSelf}>
           Delete
         </button>
       </td>
@@ -28,11 +28,12 @@ function UserRow({ u, isSelf, onRoleChange, onDelete }) {
   );
 }
 
-function Admin({ satellites, setSatellites }) {
+function Admin({ satellites, setSatellites, addEvent }) {
   const { token, user, apiBase } = useAuth();
   const [users, setUsers] = useState([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
 
   const authHeaders = {
     "Content-Type": "application/json",
@@ -57,7 +58,10 @@ function Admin({ satellites, setSatellites }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleRoleChange = async (id, role) => {
+  const handleRoleChange = async (id, username, role) => {
+    if (!window.confirm(`${role === "admin" ? "Grant" : "Remove"} admin access for "${username}"?`)) {
+      return;
+    }
     setError("");
     try {
       const res = await fetch(`${apiBase}/users/${id}/role`, {
@@ -69,13 +73,22 @@ function Admin({ satellites, setSatellites }) {
         const data = await res.json();
         throw new Error(data.detail || "Failed to update role");
       }
+      if (addEvent) {
+        addEvent(
+          `👤 ${username} ${role === "admin" ? "promoted to admin" : "demoted to user"}`,
+          "info"
+        );
+      }
       loadUsers();
     } catch (err) {
       setError(err.message);
     }
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (id, username) => {
+    if (!window.confirm(`Permanently delete the account "${username}"? This cannot be undone.`)) {
+      return;
+    }
     setError("");
     try {
       const res = await fetch(`${apiBase}/users/${id}`, {
@@ -86,6 +99,7 @@ function Admin({ satellites, setSatellites }) {
         const data = await res.json();
         throw new Error(data.detail || "Failed to delete user");
       }
+      if (addEvent) addEvent(`🗑 Account "${username}" deleted`, "warning");
       loadUsers();
     } catch (err) {
       setError(err.message);
@@ -96,15 +110,57 @@ function Admin({ satellites, setSatellites }) {
     setSatellites((prev) =>
       prev.map((sat) => (sat.name === name ? { ...sat, status } : sat))
     );
+    if (addEvent) addEvent(`🔧 ${name} set to ${status}`, "info");
   };
+
+  const adminCount = users.filter((u) => u.role === "admin").length;
+  const criticalAlertCount = satellites.reduce(
+    (total, s) => total + (s.alerts?.filter((a) => a.level === "critical").length || 0),
+    0
+  );
+
+  const filteredUsers = users.filter(
+    (u) =>
+      u.username.toLowerCase().includes(search.toLowerCase()) ||
+      u.email.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
     <div>
       <h1>Admin</h1>
       <p className="admin-subtitle">Manage users and satellites</p>
 
+      <div className="admin-stats">
+        <div className="admin-stat-card">
+          <div className="admin-stat-label">Total Users</div>
+          <div className="admin-stat-value">{users.length}</div>
+        </div>
+        <div className="admin-stat-card">
+          <div className="admin-stat-label">Admins</div>
+          <div className="admin-stat-value">{adminCount}</div>
+        </div>
+        <div className="admin-stat-card">
+          <div className="admin-stat-label">Total Satellites</div>
+          <div className="admin-stat-value">{satellites.length}</div>
+        </div>
+        <div className="admin-stat-card critical">
+          <div className="admin-stat-label">Critical Alerts</div>
+          <div className="admin-stat-value">{criticalAlertCount}</div>
+        </div>
+      </div>
+
       <section className="admin-section">
-        <h2>Users</h2>
+        <div className="admin-section-header">
+          <h2>Users</h2>
+          <input
+            className="admin-search"
+            type="text"
+            placeholder="Search by username or email..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+
         {error && <p className="auth-error">{error}</p>}
         {loading ? (
           <p>Loading users...</p>
@@ -120,7 +176,7 @@ function Admin({ satellites, setSatellites }) {
               </tr>
             </thead>
             <tbody>
-              {users.map((u) => (
+              {filteredUsers.map((u) => (
                 <UserRow
                   key={u.id}
                   u={u}
@@ -131,6 +187,9 @@ function Admin({ satellites, setSatellites }) {
               ))}
             </tbody>
           </table>
+        )}
+        {!loading && filteredUsers.length === 0 && (
+          <p className="admin-empty">No users match "{search}".</p>
         )}
       </section>
 
