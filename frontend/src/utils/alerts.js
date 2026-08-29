@@ -37,6 +37,24 @@ export function getCommunicationStatus(signal) {
   return "Connected";
 }
 
+// Rough fleet-wide health score: what fraction of (satellite × metric) checks
+// are currently within normal range. Reuses the same thresholds as alerts,
+// so a 100% score genuinely means "nothing would trigger an alert right now."
+export function computeFleetHealth(satellites) {
+  if (!satellites.length) return 100;
+  let normalCount = 0;
+  let totalChecks = 0;
+
+  satellites.forEach((s) => {
+    totalChecks += 3;
+    if (getBatteryLevel(s.battery ?? 0) === "normal") normalCount += 1;
+    if (getSignalLevel(s.signal ?? 0) === "normal") normalCount += 1;
+    if (getTemperatureLevel(s.temperature ?? 0) === "normal") normalCount += 1;
+  });
+
+  return Math.round((normalCount / totalChecks) * 100);
+}
+
 export function generateAlerts(satellite) {
   const alerts = [];
 

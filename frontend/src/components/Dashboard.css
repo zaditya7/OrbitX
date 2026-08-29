@@ -23,3 +23,15 @@
 .dashboard-section {
   margin-top: 36px;
 }
+
+.dashboard-widgets {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 18px;
+}
+
+@media (max-width: 900px) {
+  .dashboard-widgets {
+    grid-template-columns: 1fr;
+  }
+}

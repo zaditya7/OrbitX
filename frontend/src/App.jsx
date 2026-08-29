@@ -16,7 +16,7 @@ import { getOrbitalProfile } from "./utils/satelliteProfile";
 import { orbitalPeriodMinutes } from "./utils/orbital";
 import { generateAlerts } from "./utils/alerts";
 
-function AppLayout({ satellites, setSatellitesWithAlerts, missions, alertCount }) {
+function AppLayout({ satellites, setSatellitesWithAlerts, missions, events, streakAnchor, addEvent, alertCount }) {
   return (
     <div style={{ display: "flex" }}>
       <Sidebar alertCount={alertCount} />
@@ -31,6 +31,9 @@ function AppLayout({ satellites, setSatellitesWithAlerts, missions, alertCount }
                   satellites={satellites}
                   setSatellites={setSatellitesWithAlerts}
                   missions={missions}
+                  events={events}
+                  streakAnchor={streakAnchor}
+                  addEvent={addEvent}
                 />
               </ProtectedRoute>
             }
@@ -110,10 +113,6 @@ function App() {
     }
   ]);
 
-  // Satellites and missions are deliberately separate concepts: a satellite
-  // is a piece of hardware, a mission is what it's currently tasked with.
-  // Dashboard/Mission Control stats now read from this instead of reusing
-  // the active-satellite count.
   const [missions] = useState([
     {
       id: "MISSION-001",
@@ -124,6 +123,22 @@ function App() {
       progress: 67
     }
   ]);
+
+  // Rolling activity log — sourced from real state changes (alerts
+  // appearing/clearing, operator status changes), not synthetic filler.
+  const [events, setEvents] = useState([]);
+  const addEvent = (message, level = "info") => {
+    setEvents((prev) =>
+      [{ id: `${Date.now()}-${Math.random()}`, time: Date.now(), message, level }, ...prev].slice(0, 30)
+    );
+  };
+
+  // "Streak" anchor for the Dashboard hero: resets to now() the moment any
+  // satellite goes critical, so the counter is genuinely "time since the
+  // last critical event," not decorative.
+  const sessionStartRef = useRef(Date.now());
+  const [streakAnchor, setStreakAnchor] = useState(sessionStartRef.current);
+  const prevAlertKeysRef = useRef({});
 
   const setSatellitesWithAlerts = (value) => {
     setSatellites((prev) => {
@@ -137,12 +152,39 @@ function App() {
     });
   };
 
-  // Single source of truth for the live simulation loop. This used to be
-  // duplicated in SatelliteList.jsx too — two intervals independently
-  // randomizing the same fields is what caused altitude/battery to swing
-  // wildly between renders. There's exactly one tick now, and values are
-  // derived from elapsed time rather than randomly walked, so they can't
-  // compound into something implausible.
+  // Diff alerts after each commit (not inside the state updater, which must
+  // stay pure) to turn alert onset/resolution into feed entries.
+  useEffect(() => {
+    satellites.forEach((sat) => {
+      const currentKeys = new Set((sat.alerts || []).map((a) => `${a.type}:${a.level}`));
+      const prevKeys = prevAlertKeysRef.current[sat.name] || new Set();
+
+      currentKeys.forEach((key) => {
+        if (!prevKeys.has(key)) {
+          const alert = sat.alerts.find((a) => `${a.type}:${a.level}` === key);
+          if (!alert) return;
+          addEvent(
+            `${alert.level === "critical" ? "🔴" : "🟡"} ${sat.name}: ${alert.message}`,
+            alert.level
+          );
+          if (alert.level === "critical") {
+            setStreakAnchor(Date.now());
+          }
+        }
+      });
+
+      prevKeys.forEach((key) => {
+        if (!currentKeys.has(key)) {
+          const [type] = key.split(":");
+          addEvent(`✅ ${sat.name}: ${type} back to normal`, "resolved");
+        }
+      });
+
+      prevAlertKeysRef.current[sat.name] = currentKeys;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [satellites]);
+
   const startTimeRef = useRef(Date.now());
 
   useEffect(() => {
@@ -153,23 +195,14 @@ function App() {
         prev.map((s) => {
           const profile = getOrbitalProfile(s.name);
 
-          // Altitude: real baseline for this satellite with a small, bounded
-          // oscillation — recomputed fresh from elapsed time every tick, so
-          // it can never drift into an unrealistic value.
           const altitude =
             profile.altitudeKm + 2 * Math.sin(elapsedSeconds * 0.05 + profile.inclinationDeg);
 
-          // Temperature drifts on a slow cycle tied to this satellite's real
-          // orbital period (a simplified stand-in for sunlight/eclipse
-          // transitions), plus a touch of sensor noise.
           const periodMinutes = orbitalPeriodMinutes(profile.altitudeKm);
           const angularSpeed = (2 * Math.PI) / (periodMinutes * 60);
           const temperature =
             5 + 15 * Math.sin(elapsedSeconds * angularSpeed) + (Math.random() - 0.5) * 0.4;
 
-          // Battery/signal: small bounded random walk (slight downward bias
-          // on battery, to feel like real drain) instead of a one-directional
-          // crash or a big jump every tick.
           const battery = Math.min(100, Math.max(5, s.battery + (Math.random() - 0.55) * 0.6));
           const signal = Math.min(100, Math.max(5, s.signal + (Math.random() - 0.5) * 3));
 
@@ -215,6 +248,9 @@ function App() {
                 satellites={satellites}
                 setSatellitesWithAlerts={setSatellitesWithAlerts}
                 missions={missions}
+                events={events}
+                streakAnchor={streakAnchor}
+                addEvent={addEvent}
                 alertCount={alertCount}
               />
             }

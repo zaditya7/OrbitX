@@ -1,13 +1,17 @@
 import StatCard from "./StatCard";
+import DashboardHero from "./DashboardHero";
+import MissionFeed from "./MissionFeed";
+import FleetLeaderboard from "./FleetLeaderboard";
 import "./Dashboard.css";
 import MissionStatus from "./MissionStatus";
 import SatelliteList from "./SatelliteList";
 
-function Dashboard({ satellites, setSatellites, missions = [] }) {
+function Dashboard({ satellites, setSatellites, missions = [], events = [], streakAnchor, addEvent }) {
     const changeStatus = (name, status) => {
         setSatellites((prevSatellites) =>
             prevSatellites.map((satellite) => {
                 if (satellite.name === name) {
+                    if (addEvent) addEvent(`🔧 ${name} set to ${status}`, "info");
                     return { ...satellite, status };
                 }
                 return satellite;
@@ -19,6 +23,7 @@ function Dashboard({ satellites, setSatellites, missions = [] }) {
         setSatellites((prevSatellites) =>
             prevSatellites.map((satellite) => ({ ...satellite, status }))
         );
+        if (addEvent) addEvent(`🔧 Fleet set to ${status}`, "info");
     };
 
     const activeSatelliteCount = satellites.filter((s) => s.status === "active").length;
@@ -35,10 +40,7 @@ function Dashboard({ satellites, setSatellites, missions = [] }) {
 
     return (
         <main className="dashboard">
-            <div className="dashboard-header">
-                <h1>Dashboard</h1>
-                <p>Welcome back — here's the current state of your fleet.</p>
-            </div>
+            <DashboardHero satellites={satellites} streakAnchor={streakAnchor} />
 
             <div className="cards">
                 <StatCard title="Total Satellites" value={satellites.length} icon="🛰️" accent="#38bdf8" />
@@ -50,6 +52,11 @@ function Dashboard({ satellites, setSatellites, missions = [] }) {
 
             <section className="dashboard-section">
                 <MissionStatus satellites={satellites} onBulkStatusChange={changeAllStatus} />
+            </section>
+
+            <section className="dashboard-section dashboard-widgets">
+                <MissionFeed events={events} />
+                <FleetLeaderboard satellites={satellites} />
             </section>
 
             <section className="dashboard-section">
