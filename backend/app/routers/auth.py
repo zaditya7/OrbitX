@@ -1,3 +1,5 @@
+import os
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
@@ -5,6 +7,12 @@ from .. import models, schemas, auth
 from ..database import get_db
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+
+# This account is intentionally public — its password isn't meant to be a
+# secret. It exists purely so visitors can explore without signing up.
+DEMO_USERNAME = "demo"
+DEMO_EMAIL = "demo@orbitx.local"
+DEMO_PASSWORD = os.getenv("DEMO_PASSWORD", "orbitx-demo")
 
 
 @router.post("/signup", response_model=schemas.Token, status_code=status.HTTP_201_CREATED)
@@ -49,3 +57,22 @@ def login(payload: schemas.UserLogin, db: Session = Depends(get_db)):
 @router.get("/me", response_model=schemas.UserOut)
 def me(current_user: models.User = Depends(auth.get_current_user)):
     return current_user
+
+@router.post("/demo-login", response_model=schemas.Token)
+def demo_login(db: Session = Depends(get_db)):
+    # Created lazily on first use rather than at server startup, so it's
+    # self-healing even if an admin ever deletes the demo account.
+    user = db.query(models.User).filter(models.User.username == DEMO_USERNAME).first()
+    if not user:
+        user = models.User(
+            username=DEMO_USERNAME,
+            email=DEMO_EMAIL,
+            hashed_password=auth.hash_password(DEMO_PASSWORD),
+            role="user",
+        )
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+
+    token = auth.create_access_token({"sub": user.username, "role": user.role})
+    return schemas.Token(access_token=token, user=user)

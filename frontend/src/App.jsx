@@ -18,10 +18,10 @@ import { generateAlerts } from "./utils/alerts";
 
 function AppLayout({ satellites, setSatellitesWithAlerts, missions, events, streakAnchor, addEvent, alertCount }) {
   return (
-    <div style={{ display: "flex" }}>
+    <div className="app-shell">
       <Sidebar alertCount={alertCount} />
 
-      <div style={{ flex: 1, padding: "20px" }}>
+      <div className="app-content">
         <Routes>
           <Route
             path="/"

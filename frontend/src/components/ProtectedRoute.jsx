@@ -1,11 +1,12 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import LoadingScreen from "./LoadingScreen";
 
 function ProtectedRoute({ children, adminOnly = false }) {
-  const { user, loading } = useAuth();
+  const { user, loading, isWaking } = useAuth();
 
   if (loading) {
-    return <div style={{ padding: 40 }}>Loading...</div>;
+    return <LoadingScreen showWakingNote={isWaking} />;
   }
 
   if (!user) {

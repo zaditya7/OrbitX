@@ -63,30 +63,32 @@ function SatelliteComparePanel({ satellites, nameA, nameB, onChangeA, onChangeB 
       </div>
 
       {satA && satB ? (
-        <table className="compare-table">
-          <thead>
-            <tr>
-              <th></th>
-              <th>
-                <span className="compare-name-dot" style={{ background: getSatelliteColor(indexA) }} />
-                {satA.name}
-              </th>
-              <th>
-                <span className="compare-name-dot" style={{ background: getSatelliteColor(indexB) }} />
-                {satB.name}
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {FIELDS.map((field) => (
-              <tr key={field.key}>
-                <td className="compare-field-label">{field.label}</td>
-                <td>{rowsA[field.key]}</td>
-                <td>{rowsB[field.key]}</td>
+        <div className="compare-table-scroll">
+          <table className="compare-table">
+            <thead>
+              <tr>
+                <th></th>
+                <th>
+                  <span className="compare-name-dot" style={{ background: getSatelliteColor(indexA) }} />
+                  {satA.name}
+                </th>
+                <th>
+                  <span className="compare-name-dot" style={{ background: getSatelliteColor(indexB) }} />
+                  {satB.name}
+                </th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {FIELDS.map((field) => (
+                <tr key={field.key}>
+                  <td className="compare-field-label">{field.label}</td>
+                  <td>{rowsA[field.key]}</td>
+                  <td>{rowsB[field.key]}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       ) : (
         <p className="compare-empty">Pick two satellites to compare.</p>
       )}

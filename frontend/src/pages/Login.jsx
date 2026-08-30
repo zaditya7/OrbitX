@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import GuestLoginButton from "../components/GuestLoginButton";
 import "./Auth.css";
 
 function Login() {
@@ -8,7 +9,7 @@ function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const { login, isWaking } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -28,13 +29,18 @@ function Login() {
   return (
     <div className="auth-page">
       <form className="auth-card" onSubmit={handleSubmit}>
-        <img className="auth-logo" src="/orbitxlogo.png" alt="OrbitX Mission Control" />
+        <h1>🛰 OrbitX</h1>
         <p className="auth-subtitle">Sign in to Mission Control</p>
 
         {error && <p className="auth-error">{error}</p>}
 
         <label>Username</label>
-        <input value={username} onChange={(e) => setUsername(e.target.value)} required />
+        <input
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          required
+          autoComplete="username"
+        />
 
         <label>Password</label>
         <input
@@ -42,15 +48,24 @@ function Login() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
+          autoComplete="current-password"
         />
 
         <button type="submit" disabled={loading}>
           {loading ? "Signing in..." : "Sign In"}
         </button>
 
+        {isWaking && (
+          <p className="auth-waking-note">
+            ⏳ Waking up the server — first request after inactivity can take up to a minute.
+          </p>
+        )}
+
         <p className="auth-switch">
           No account? <Link to="/signup">Create one</Link>
         </p>
+
+        <GuestLoginButton />
       </form>
     </div>
   );

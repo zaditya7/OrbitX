@@ -40,3 +40,18 @@ main {
   padding: 20px;
 }
 
+.app-shell {
+  display: flex;
+}
+
+.app-content {
+  flex: 1;
+  padding: 20px;
+  min-width: 0; /* lets grid/flex children inside actually shrink on narrow screens */
+}
+
+@media (max-width: 860px) {
+  .app-content {
+    padding: 74px 14px 20px; /* extra top padding clears the fixed hamburger button */
+  }
+}

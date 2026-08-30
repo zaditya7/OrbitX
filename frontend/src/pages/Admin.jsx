@@ -165,28 +165,30 @@ function Admin({ satellites, setSatellites, addEvent }) {
         {loading ? (
           <p>Loading users...</p>
         ) : (
-          <table className="admin-table">
-            <thead>
-              <tr>
-                <th>Username</th>
-                <th>Email</th>
-                <th>Role</th>
-                <th>Joined</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredUsers.map((u) => (
-                <UserRow
-                  key={u.id}
-                  u={u}
-                  isSelf={u.id === user.id}
-                  onRoleChange={handleRoleChange}
-                  onDelete={handleDelete}
-                />
-              ))}
-            </tbody>
-          </table>
+          <div className="table-scroll">
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th>Username</th>
+                  <th>Email</th>
+                  <th>Role</th>
+                  <th>Joined</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredUsers.map((u) => (
+                  <UserRow
+                    key={u.id}
+                    u={u}
+                    isSelf={u.id === user.id}
+                    onRoleChange={handleRoleChange}
+                    onDelete={handleDelete}
+                  />
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
         {!loading && filteredUsers.length === 0 && (
           <p className="admin-empty">No users match "{search}".</p>
