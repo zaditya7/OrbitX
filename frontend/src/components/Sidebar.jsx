@@ -17,8 +17,6 @@ function Sidebar({ alertCount }) {
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  // Auto-close the drawer whenever the route changes, so tapping a link
-  // doesn't leave the overlay sitting open on top of the new page.
   useEffect(() => {
     setMobileOpen(false);
   }, [location.pathname]);
@@ -49,13 +47,11 @@ function Sidebar({ alertCount }) {
 
       <div className={`sidebar ${mobileOpen ? "mobile-open" : ""}`}>
         <div className="sidebar-brand">
-          <div className="brand-mark">
-            <span className="brand-mark-dot" />
-          </div>
-          <div>
-            <div className="brand-title">ORBITX</div>
-            <div className="brand-subtitle">Mission Control</div>
-          </div>
+          <img
+            className="sidebar-logo"
+            src="/orbitxlogo.png"
+            alt="OrbitX Mission Control"
+          />
         </div>
 
         <div className="sidebar-divider" />

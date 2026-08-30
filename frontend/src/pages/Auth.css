@@ -7,8 +7,7 @@
 }
 
 .auth-card {
-  width: 360px;
-  max-width: 90vw;
+  width: min(360px, calc(100% - 32px));
   background: rgba(30, 41, 59, 0.6);
   border: 1px solid rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(10px);
@@ -18,9 +17,12 @@
   flex-direction: column;
 }
 
-.auth-card h1 {
-  text-align: center;
-  margin-bottom: 4px;
+.auth-logo {
+  width: min(230px, 100%);
+  height: auto;
+  align-self: center;
+  margin: -4px auto 16px;
+  object-fit: contain;
 }
 
 .auth-subtitle {
